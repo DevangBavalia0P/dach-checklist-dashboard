@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DACH Facility Operations Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f6fa;
+  --white: #ffffff;
+  --border: #e8eaef;
+  --border2: #d0d4de;
+  --text: #1a1d2e;
+  --muted: #7b82a0;
+  --muted2: #a8afc7;
+  --accent: #2563eb;
+  --accent-light: #eff4ff;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --red: #dc2626;
+  --red-light: #fff1f1;
+  --yellow: #d97706;
+  --yellow-light: #fffbeb;
+  --purple: #7c3aed;
+  --purple-light: #f5f3ff;
+  --teal: #0891b2;
+  --teal-light: #ecfeff;
+  --ber: #2563eb;
+  --ber-light: #eff4ff;
+  --muc: #16a34a;
+  --muc-light: #f0fdf4;
+  --vie: #d97706;
+  --vie-light: #fffbeb;
+  --fra: #dc2626;
+  --fra-light: #fff1f1;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky; top: 0; z-index: 200;
+}
+
+.header-left { display:flex; align-items:center; gap:14px; }
+
+.logo-mark {
+  width: 38px; height: 38px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items:center; justify-content:center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 700; color: white;
+  letter-spacing: -0.5px;
+}
+
+.header-title {
+  font-size: 15px; font-weight: 600; color: var(--text);
+}
+.header-subtitle {
+  font-size: 11px; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 1px;
+}
+
+.header-right { display:flex; align-items:center; gap:12px; }
+
+.live-chip {
+  display: flex; align-items:center; gap:6px;
+  background: var(--green-light);
+  border: 1px solid #bbf7d0;
+  color: var(--green);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.live-dot {
+  width: 6px; height:6px; border-radius:50%;
+  background: var(--green);
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%,100%{opacity:1;} 50%{opacity:0.3;}
+}
+
+.sheets-btn {
+  display: flex; align-items:center; gap:7px;
+  background: #fff;
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-decoration: none;
+}
+.sheets-btn:hover {
+  border-color: #34a853;
+  color: #34a853;
+  background: #f0fdf4;
+}
+.sheets-icon {
+  width: 16px; height: 16px;
+}
+
+.refresh-btn {
+  display:flex; align-items:center; gap:6px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Sora', sans-serif;
+}
+.refresh-btn:hover { background: #1d4ed8; }
+.refresh-btn.loading svg { animation: spin 1s linear infinite; }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* NAV TABS */
+.nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  display: flex; gap: 0;
+}
+
+.nav-tab {
+  font-family: 'Sora', sans-serif;
+  font-size: 13px; font-weight: 500;
+  color: var(--muted);
+  padding: 14px 20px;
+  border: none; background: transparent;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  display:flex; align-items:center; gap:7px;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.nav-tab .tab-icon { font-size:14px; }
+
+/* MAIN LAYOUT */
+main { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+.view { display:none; }
+.view.active { display:block; animation: fadeUp 0.25s ease; }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+/* FILTER BAR */
+.filter-bar {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom: 22px; flex-wrap:wrap;
+}
+
+.filter-label {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.f-select {
+  background: var(--white);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; outline:none;
+  transition: border-color 0.15s;
+}
+.f-select:hover { border-color: var(--accent); }
+.f-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+input[type="date"] {
+  background: var(--white);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 12px; cursor:pointer; outline:none;
+  transition: border-color 0.15s;
+}
+input[type="date"]:focus { border-color: var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+
+.site-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--white);
+  color: var(--muted);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  font-family: 'Sora', sans-serif;
+}
+.site-pill:hover { border-color: var(--border2); color:var(--text); }
+.site-pill.on-BER { background:var(--ber-light); color:var(--ber); border-color:var(--ber); }
+.site-pill.on-MUC { background:var(--muc-light); color:var(--muc); border-color:var(--muc); }
+.site-pill.on-VIE { background:var(--vie-light); color:var(--vie); border-color:var(--vie); }
+.site-pill.on-FRA { background:var(--fra-light); color:var(--fra); border-color:var(--fra); }
+.site-pill.on-all { background:var(--accent-light); color:var(--accent); border-color:var(--accent); }
+
+.type-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--white);
+  color: var(--muted);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  font-family: 'Sora', sans-serif;
+}
+.type-pill.on-all { background:var(--accent-light); color:var(--accent); border-color:var(--accent); }
+.type-pill.on-Automation { background:var(--purple-light); color:var(--purple); border-color:var(--purple); }
+.type-pill.on-Facility { background:var(--teal-light); color:var(--teal); border-color:var(--teal); }
+
+/* KPI GRID */
+.kpi-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap:16px; margin-bottom:24px;
+}
+
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border-color: var(--border2);
+}
+.kpi-card::after {
+  content: '↗';
+  position: absolute;
+  top: 14px; right: 16px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.kpi-card:hover::after { opacity: 0.3; }
+
+.kpi-icon {
+  width:36px; height:36px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; margin-bottom:14px;
+}
+.kpi-label {
+  font-size:11px; font-weight:600; color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.8px;
+  margin-bottom:6px;
+}
+.kpi-value {
+  font-family:'JetBrains Mono', monospace;
+  font-size:34px; font-weight:700; line-height:1;
+  margin-bottom:4px;
+}
+.kpi-sub { font-size:11px; color:var(--muted); }
+
+/* GRID LAYOUTS */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:20px; }
+.g31 { display:grid; grid-template-columns:2fr 1fr; gap:20px; margin-bottom:20px; }
+.g13 { display:grid; grid-template-columns:1fr 2fr; gap:20px; margin-bottom:20px; }
+@media(max-width:1100px){.g2,.g3,.g31,.g13{grid-template-columns:1fr;}}
+
+/* CARD */
+.card {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.card-head {
+  padding:18px 22px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.card-title {
+  font-size:13px; font-weight:700; color:var(--text);
+  display:flex; align-items:center; gap:8px;
+}
+.card-body { padding:18px 22px; }
+.card-badge {
+  background:var(--bg);
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-size:11px; font-weight:600;
+  padding:3px 10px; border-radius:20px;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* TABLE */
+.dtable { width:100%; border-collapse:collapse; }
+.dtable th {
+  font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:1px;
+  color:var(--muted);
+  padding:10px 14px;
+  border-bottom:2px solid var(--border);
+  text-align:left; white-space:nowrap;
+  background:var(--bg);
+}
+.dtable td {
+  padding:11px 14px;
+  font-size:13px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+.dtable tr:last-child td { border-bottom:none; }
+.dtable tbody tr { transition:background 0.12s; cursor:pointer; }
+.dtable tbody tr:hover { background:#f8f9ff; }
+
+/* SCROLL */
+.scroll { overflow-y:auto; max-height:380px; }
+.scroll::-webkit-scrollbar { width:4px; }
+.scroll::-webkit-scrollbar-thumb { background:var(--border2); border-radius:4px; }
+
+/* AVATAR */
+.av {
+  width:30px; height:30px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700;
+  flex-shrink:0;
+}
+.person-cell { display:flex; align-items:center; gap:9px; }
+.person-name { font-weight:500; }
+.person-email { font-size:11px; color:var(--muted); }
+
+/* TAGS */
+.tag {
+  display:inline-flex; align-items:center;
+  padding:3px 9px; border-radius:6px;
+  font-size:11px; font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+  letter-spacing:0.3px;
+}
+.tag-auto { background:var(--purple-light); color:var(--purple); }
+.tag-fac { background:var(--teal-light); color:var(--teal); }
+.tag-ber { background:var(--ber-light); color:var(--ber); }
+.tag-muc { background:var(--muc-light); color:var(--muc); }
+.tag-vie { background:var(--vie-light); color:var(--vie); }
+.tag-fra { background:var(--fra-light); color:var(--fra); }
+
+/* STATUS BADGE */
+.status-ok {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--green-light); color:var(--green);
+  padding:3px 9px; border-radius:6px;
+  font-size:11px; font-weight:600;
+}
+.status-miss {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--red-light); color:var(--red);
+  padding:3px 9px; border-radius:6px;
+  font-size:11px; font-weight:600;
+}
+.status-issue {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--yellow-light); color:var(--yellow);
+  padding:3px 9px; border-radius:6px;
+  font-size:11px; font-weight:600;
+}
+
+/* SHEETS LINK IN TABLE */
+.sheets-link-btn {
+  display:inline-flex; align-items:center; gap:5px;
+  background:#f0fdf4; color:#16a34a;
+  border:1px solid #bbf7d0;
+  padding:4px 10px; border-radius:6px;
+  font-size:11px; font-weight:600;
+  cursor:pointer; text-decoration:none;
+  transition:all 0.15s;
+  white-space:nowrap;
+}
+.sheets-link-btn:hover { background:#dcfce7; border-color:#86efac; }
+
+/* MISSING CARD */
+.missing-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px;
+  border-bottom:1px solid var(--border);
+  transition:background 0.12s;
+  cursor:default;
+}
+.missing-row:last-child { border-bottom:none; }
+.missing-row:hover { background:var(--bg); }
+
+/* SITE BLOCK */
+.site-blocks { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+@media(max-width:900px){.site-blocks{grid-template-columns:1fr 1fr;}}
+
+.site-block {
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:18px 20px;
+  box-shadow:var(--shadow);
+  cursor:pointer; transition:all 0.18s;
+}
+.site-block:hover { transform:translateY(-2px); box-shadow:var(--shadow-lg); }
+.sb-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.sb-site { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; }
+.sb-lead { font-size:11px; color:var(--muted); margin-top:2px; }
+.sb-cov {
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px; font-weight:700;
+}
+.sb-cov-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+.sb-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:12px; }
+.sb-stat { text-align:center; }
+.sb-stat-v { font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; }
+.sb-stat-l { font-size:10px; color:var(--muted); }
+.prog { height:4px; background:var(--bg); border-radius:4px; margin-top:14px; overflow:hidden; }
+.prog-fill { height:100%; border-radius:4px; transition:width 1s ease; }
+
+/* CHART WRAP */
+.chart-wrap { position:relative; }
+
+/* SECTION DIVIDER */
+.section-title {
+  font-size:12px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:1.5px;
+  margin-bottom:14px; margin-top:6px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* NO DATA */
+.no-data {
+  text-align:center; padding:48px;
+  color:var(--muted); font-size:13px;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  display:none; position:fixed;
+  inset:0; background:rgba(15,18,40,0.45);
+  z-index:1000; backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+
+.modal {
+  background:var(--white);
+  border-radius:16px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.2);
+  width:min(780px,94vw);
+  max-height:88vh;
+  display:flex; flex-direction:column;
+  animation:modalIn 0.22s cubic-bezier(.34,1.56,.64,1);
+  overflow:hidden;
+}
+@keyframes modalIn {
+  from{opacity:0;transform:scale(0.94) translateY(12px);}
+  to{opacity:1;transform:scale(1) translateY(0);}
+}
+
+.modal-header {
+  padding:22px 26px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:flex-start; justify-content:space-between;
+  flex-shrink:0;
+}
+.modal-title { font-size:17px; font-weight:700; margin-bottom:3px; }
+.modal-sub { font-size:12px; color:var(--muted); }
+
+.modal-close {
+  width:32px; height:32px; border-radius:8px;
+  border:1px solid var(--border); background:transparent;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:var(--muted); transition:all 0.15s;
+  flex-shrink:0;
+}
+.modal-close:hover { background:var(--bg); color:var(--text); }
+
+.modal-body {
+  overflow-y:auto; padding:22px 26px;
+  flex:1;
+}
+.modal-body::-webkit-scrollbar{width:4px;}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+.modal-kpis {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:12px; margin-bottom:22px;
+}
+.modal-kpi {
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:14px 16px;
+}
+.modal-kpi-v {
+  font-family:'JetBrains Mono',monospace;
+  font-size:24px; font-weight:700;
+}
+.modal-kpi-l { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* TIMELINE */
+.tl-item {
+  display:flex; gap:14px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+.tl-item:last-child{border-bottom:none;}
+.tl-time {
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px; color:var(--muted);
+  min-width:48px; padding-top:2px;
+}
+.tl-content { flex:1; }
+.tl-name { font-size:13px; font-weight:600; margin-bottom:4px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.tl-comment {
+  font-size:11px; color:var(--muted);
+  background:var(--bg); border-left:3px solid var(--border2);
+  padding:5px 10px; border-radius:0 4px 4px 0; margin-top:5px;
+  font-style:italic;
+}
+
+/* LOADING OVERLAY ON REFRESH */
+.data-loading {
+  position:fixed; inset:0;
+  background:rgba(255,255,255,0.7);
+  z-index:500; display:none;
+  align-items:center; justify-content:center;
+  flex-direction:column; gap:12px;
+  backdrop-filter:blur(2px);
+}
+.data-loading.show { display:flex; }
+.loader {
+  width:36px; height:36px;
+  border:3px solid var(--border);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+
+/* GOOGLE SHEETS SETUP INFO */
+.info-box {
+  background:var(--accent-light);
+  border:1px solid #c7d7fc;
+  border-radius:var(--radius-sm);
+  padding:14px 16px;
+  font-size:12px; color:#1e40af;
+  margin-bottom:20px;
+  display:flex; gap:10px; align-items:flex-start;
+}
+.info-box-icon { flex-shrink:0; font-size:16px; }
+
+/* YEAR OVERVIEW TABLE */
+.year-table { width:100%; border-collapse:collapse; }
+.year-table th,.year-table td {
+  padding:10px 14px;
+  border:1px solid var(--border);
+  font-size:12px; text-align:center;
+}
+.year-table th {
+  background:var(--bg); font-weight:700; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.8px; color:var(--muted);
+}
+.year-table .site-col { font-family:'JetBrains Mono',monospace; font-weight:700; text-align:left; }
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="data-loading" id="dataLoading">
+  <div class="loader"></div>
+  <div style="font-size:13px;color:var(--muted);font-weight:500">Syncing from Google Sheets…</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Detail View</div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="logo-mark">OP</div>
+    <div>
+      <div class="header-title">DACH Facility Operations</div>
+      <div class="header-subtitle" id="headerDate">Loading…</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      <span id="lastSync">Live</span>
+    </div>
+    <a class="sheets-btn" id="mainSheetsBtn" href="https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac" target="_blank">
+      <svg class="sheets-icon" viewBox="0 0 24 24"><path fill="#34a853" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3h4v2h-4V6zm0 4h4v2h-4v-2zm0 4h4v2h-4v-2zM8 6h2v2H8V6zm0 4h2v2H8v-2zm0 4h2v2H8v-2z"/></svg>
+      Open Google Sheet
+    </a>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh Data
+    </button>
+  </div>
+</header>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-tab active" onclick="switchTab('today',this)"><span class="tab-icon">📋</span>Today</button>
+  <button class="nav-tab" onclick="switchTab('daily',this)"><span class="tab-icon">📅</span>Daily</button>
+  <button class="nav-tab" onclick="switchTab('weekly',this)"><span class="tab-icon">📆</span>Weekly</button>
+  <button class="nav-tab" onclick="switchTab('monthly',this)"><span class="tab-icon">🗓</span>Monthly</button>
+  <button class="nav-tab" onclick="switchTab('people',this)"><span class="tab-icon">👤</span>By Person</button>
+  <button class="nav-tab" onclick="switchTab('site',this)"><span class="tab-icon">🏭</span>By Site</button>
+  <button class="nav-tab" onclick="switchTab('tickets',this)"><span class="tab-icon">🎫</span>Tickets <span id="open-ticket-badge" style="background:#dc2626;color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px;font-family:'JetBrains Mono'"></span></button>
+</div>
+
+<main>
+
+<!-- ===================== TODAY ===================== -->
+<div class="view active" id="view-today">
+  <div class="kpi-grid" id="today-kpis"></div>
+  <div class="g31">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">
+          📋 Today's Submission Timeline
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="type-pill on-all" onclick="setTodayType('all',this)">All</button>
+          <button class="type-pill" onclick="setTodayType('Automation',this)">Automation</button>
+          <button class="type-pill" onclick="setTodayType('Facility',this)">Facility</button>
+        </div>
+      </div>
+      <div class="scroll" id="today-timeline"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">❌ Not Submitted Yet</div>
+          <div class="card-badge" id="missing-badge">—</div>
+        </div>
+        <div id="missing-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">📊 Site Coverage Today</div></div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:180px">
+            <canvas id="todaySiteChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DAILY ===================== -->
+<div class="view" id="view-daily">
+  <div class="filter-bar">
+    <span class="filter-label">Date</span>
+    <input type="date" id="daily-date" onchange="renderDaily()">
+    <span class="filter-label">Site</span>
+    <button class="site-pill on-all" onclick="setSiteF('all',this,'daily')">ALL</button>
+    <button class="site-pill" onclick="setSiteF('BER',this,'daily')">BER</button>
+    <button class="site-pill" onclick="setSiteF('MUC',this,'daily')">MUC</button>
+    <button class="site-pill" onclick="setSiteF('VIE',this,'daily')">VIE</button>
+    <button class="site-pill" onclick="setSiteF('FRA',this,'daily')">FRA</button>
+    <span class="filter-label">Type</span>
+    <button class="type-pill on-all" onclick="setTypeF('all',this,'daily')">All</button>
+    <button class="type-pill" onclick="setTypeF('Automation',this,'daily')">Automation</button>
+    <button class="type-pill" onclick="setTypeF('Facility',this,'daily')">Facility</button>
+  </div>
+  <div class="g31">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">📋 Submissions</div>
+        <div class="card-badge" id="daily-badge">—</div>
+      </div>
+      <div class="scroll">
+        <table class="dtable">
+          <thead><tr>
+            <th>Person</th><th>Site</th><th>Type</th><th>Shift</th><th>Time</th><th>Status</th><th>Open</th>
+          </tr></thead>
+          <tbody id="daily-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card">
+        <div class="card-head"><div class="card-title">❌ Not Submitted</div></div>
+        <div id="daily-missing"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Type Split</div></div>
+        <div class="card-body">
+          <div class="chart-wrap" style="height:150px">
+            <canvas id="dailyTypeChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== WEEKLY ===================== -->
+<div class="view" id="view-weekly">
+  <div class="filter-bar">
+    <span class="filter-label">Year</span>
+    <select class="f-select" id="w-year" onchange="renderWeekly()">
+      <option value="2026">2026</option><option value="2025">2025</option>
+    </select>
+    <span class="filter-label">Week</span>
+    <select class="f-select" id="w-week" onchange="renderWeekly()"></select>
+  </div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)" id="weekly-kpis"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-title">📈 8-Week Trend</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:240px"><canvas id="weeklyTrend"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">🏭 This Week by Site & Type</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:240px"><canvas id="weeklySite"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">This Week's Submissions</div><div class="card-badge" id="weekly-badge">—</div></div>
+    <div class="scroll">
+      <table class="dtable">
+        <thead><tr><th>Date</th><th>Person</th><th>Site</th><th>Type</th><th>Shift</th><th>Comment</th><th>Open</th></tr></thead>
+        <tbody id="weekly-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MONTHLY ===================== -->
+<div class="view" id="view-monthly">
+  <div class="filter-bar">
+    <span class="filter-label">Year</span>
+    <select class="f-select" id="m-year" onchange="renderMonthly()">
+      <option value="2026">2026</option><option value="2025">2025</option>
+    </select>
+    <span class="filter-label">Month</span>
+    <select class="f-select" id="m-month" onchange="renderMonthly()">
+      <option value="3">March</option><option value="2">February</option>
+      <option value="1">January</option><option value="12">December</option><option value="11">November</option>
+    </select>
+  </div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)" id="monthly-kpis"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-title">📊 Submissions by Site</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:250px"><canvas id="monthlyBar"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">⚖️ Automation vs Facility</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:250px"><canvas id="monthlyDonut"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">📅 Full Year Overview</div></div>
+    <div class="card-body" style="overflow-x:auto">
+      <div id="yearTableWrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PEOPLE ===================== -->
+<div class="view" id="view-people">
+  <div class="filter-bar">
+    <span class="filter-label">Site</span>
+    <button class="site-pill on-all" onclick="setPeopleF('all',this)">ALL</button>
+    <button class="site-pill" onclick="setPeopleF('BER',this)">BER</button>
+    <button class="site-pill" onclick="setPeopleF('MUC',this)">MUC</button>
+    <button class="site-pill" onclick="setPeopleF('VIE',this)">VIE</button>
+    <button class="site-pill" onclick="setPeopleF('FRA',this)">FRA</button>
+    <span class="filter-label">Period</span>
+    <select class="f-select" id="people-period" onchange="renderPeople()">
+      <option value="all">All Time</option>
+      <option value="30">Last 30 Days</option>
+      <option value="7">Last 7 Days</option>
+      <option value="today">Today Only</option>
+    </select>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">👤 Technician Submission Records</div>
+      <div class="card-badge" id="people-badge">—</div>
+    </div>
+    <table class="dtable" id="people-table">
+      <thead><tr>
+        <th>Technician</th><th>Site</th><th>Lead</th>
+        <th>Total</th><th>Automation</th><th>Facility</th>
+        <th>Last Submission</th><th>Today</th>
+      </tr></thead>
+      <tbody id="people-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== SITE ===================== -->
+<div class="view" id="view-site">
+  <div class="site-blocks" id="site-blocks"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-head"><div class="card-title">📈 Weekly Trend by Site</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:260px"><canvas id="siteTimeline"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">⚖️ Automation vs Facility per Site</div></div>
+      <div class="card-body">
+        <div class="chart-wrap" style="height:260px"><canvas id="siteType"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><div class="card-title">👥 All Technicians by Site</div></div>
+    <table class="dtable">
+      <thead><tr><th>Technician</th><th>Site</th><th>Lead</th><th>Total</th><th>Automation</th><th>Facility</th><th>Last Sub</th><th>Today</th></tr></thead>
+      <tbody id="site-person-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== TICKETS ===================== -->
+<div class="view" id="view-tickets">
+  <div class="kpi-grid" id="ticket-kpis"></div>
+  <div class="filter-bar" style="margin-bottom:18px">
+    <span class="filter-label">Site</span>
+    <button class="site-pill on-all" onclick="setTicketF('site','all',this)">ALL</button>
+    <button class="site-pill" onclick="setTicketF('site','BER',this)">BER</button>
+    <button class="site-pill" onclick="setTicketF('site','MUC',this)">MUC</button>
+    <button class="site-pill" onclick="setTicketF('site','VIE',this)">VIE</button>
+    <button class="site-pill" onclick="setTicketF('site','FRA',this)">FRA</button>
+    <span class="filter-label">Status</span>
+    <button class="type-pill on-all" onclick="setTicketF('status','all',this)">All</button>
+    <button class="type-pill" onclick="setTicketF('status','Not started',this)">Not Started</button>
+    <button class="type-pill" onclick="setTicketF('status','In progress',this)">In Progress</button>
+    <button class="type-pill" onclick="setTicketF('status','Planned',this)">Planned</button>
+    <button class="type-pill" onclick="setTicketF('status','Done',this)">Done</button>
+    <span class="filter-label">Type</span>
+    <button class="type-pill on-all" onclick="setTicketF('type','all',this)">All</button>
+    <button class="type-pill" onclick="setTicketF('type','Automation',this)">Automation</button>
+    <button class="type-pill" onclick="setTicketF('type','Facility',this)">Facility</button>
+    <span class="filter-label">Show</span>
+    <button class="type-pill" id="overdue-btn" onclick="toggleOverdue(this)">⚠ Overdue Only</button>
+  </div>
+  <div class="g3" style="margin-bottom:20px">
+    <div class="card">
+      <div class="card-head"><div class="card-title">📊 Status Breakdown</div></div>
+      <div class="card-body"><div class="chart-wrap" style="height:200px"><canvas id="ticketStatusChart"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">🏭 Tickets by Site</div></div>
+      <div class="card-body"><div class="chart-wrap" style="height:200px"><canvas id="ticketSiteChart"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">📈 Created per Month</div></div>
+      <div class="card-body"><div class="chart-wrap" style="height:200px"><canvas id="ticketTrendChart"></canvas></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">🎫 All Tickets</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="text" id="ticket-search" placeholder="Search ID, person, findings…" oninput="renderTickets()"
+          style="border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 12px;font-size:12px;font-family:'Sora',sans-serif;outline:none;width:240px;transition:border-color .15s"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+        <div class="card-badge" id="ticket-count-badge">—</div>
+      </div>
+    </div>
+    <div class="scroll" style="max-height:500px">
+      <table class="dtable">
+        <thead><tr>
+          <th>Ticket ID</th><th>Created</th><th>Site</th><th>Type</th>
+          <th>Responsible</th><th>Findings (summary)</th><th>Status</th><th>Due Date</th><th>Open</th>
+        </tr></thead>
+        <tbody id="ticket-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ================================================================
+// CONFIG — paste your Google Sheet Web App URL here after setup
+// ================================================================
+const SHEETS_URL = ""; // e.g. "https://script.google.com/macros/s/YOUR_ID/exec"
+const SHEET_DIRECT_URL = "https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac";
+
+// ================================================================
+// STATIC DATA (used as fallback / initial load)
+// ================================================================
+const ROSTER = [
+  {name:"Omar SABER",email:"omar.saber@gurkerl.at",site:"VIE",lead:"Sven GRÜTZNER"},
+  {name:"Ali JAFARI",email:"ali.reza@gurkerl.at",site:"VIE",lead:"Sven GRÜTZNER"},
+  {name:"Seyedvahab MIRMOSTAFAVI",email:"seyedvahab.mirmostafavi@gurkerl.at",site:"VIE",lead:"Sven GRÜTZNER"},
+  {name:"Mustafa ZAINAL",email:"mustafa.zainal@gurkerl.at",site:"VIE",lead:"Sven GRÜTZNER"},
+  {name:"Danijel KARAPANDZA",email:"danijel.karapandza@gurkerl.at",site:"VIE",lead:"Sven GRÜTZNER"},
+  {name:"Jacek Rek",email:"jacek.rek@knuspr.de",site:"FRA",lead:"Younes El Malki"},
+  {name:"Edison",email:"edison.caushaj@knuspr.de",site:"FRA",lead:"Younes El Malki"},
+  {name:"Amine Kabdani",email:"amine.kabdani@knuspr.de",site:"FRA",lead:"Younes El Malki"},
+  {name:"Shubham Rajaram Ghogare",email:"shubham.ghogare@knuspr.de",site:"FRA",lead:"Younes El Malki"},
+  {name:"Tarun Gauniyal",email:"tarun.gauniyal@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
+  {name:"Keval Kakadiya",email:"keval.kakadiya@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
+  {name:"Roshil Rose",email:"roshil.rose@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
+  {name:"Enosh Varghese",email:"enosh.varghese@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
+  {name:"Jordan McGregor",email:"jordan.mcgregor@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
+  {name:"Yogendra Rathore",email:"yogendra.rathore@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
+  {name:"Ravi Kumar",email:"ravi.kumar@knuspr.de",site:"BER",lead:"Devang Bavalia"},
+  {name:"Florin Adrian Bordianu",email:"florin.bordianu@knuspr.de",site:"BER",lead:"Devang Bavalia"},
+  {name:"Glan Miranda",email:"glan.miranda@knuspr.de",site:"BER",lead:"Devang Bavalia"},
+  {name:"Sikandar Khan",email:"sikandar.khan@knuspr.de",site:"BER",lead:"Devang Bavalia"},
+];
+
+const RAW = [
+  ["2026-03-30 15:35:29","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning Shift","Need to fix the lift motor in rb25 ambient","MUC","Automation","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1954430490","A199"],
+  ["2026-03-30 15:34:04","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning","Need to fixed the rolling door","MUC","Facility","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","851921344","A218"],
+  ["2026-03-30 15:12:20","sikandar.khan@knuspr.de","Sikandar Khan","Morning Shift","No issue founded just need to clean robotic arm ports","BER","Automation","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1539245163","A270"],
+  ["2026-03-30 15:10:45","sikandar.khan@knuspr.de","Sikandar Khan","Morning","No major issue founded.","BER","Facility","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1250514310","A279"],
+  ["2026-03-30 06:06:25","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","All good","BER","Automation","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1539245163","A269"],
+  ["2026-03-30 06:04:59","glan.miranda@knuspr.de","Glan Miranda","Morning","No new issues","BER","Facility","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1250514310","A278"],
+  ["2026-03-30 05:40:14","roshil.rose@knuspr.de","Roshil Rose","Night Shift","3 robots outside the AS","MUC","Automation","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1954430490","A198"],
+  ["2026-03-30 05:39:18","roshil.rose@knuspr.de","Roshil Rose","Night","Bakery freezer power was tripped. It's working now","MUC","Facility","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","851921344","A217"],
+  ["2026-03-30 05:13:31","mustafa.zainal@gurkerl.at","Mustafa ZAINAL","Morning Shift","👍","VIE","Automation","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1309131209","A146"],
+  ["2026-03-30 05:12:01","mustafa.zainal@gurkerl.at","Mustafa ZAINAL","Morning","Mustafa","VIE","Facility","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","123456789","A167"],
+  ["2026-03-28 06:10:00","glan.miranda@knuspr.de","Glan Miranda","Morning","All clear","BER","Facility","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1250514310","A277"],
+  ["2026-03-28 06:12:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","All clear","BER","Automation","1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac","1539245163","A268"],
+  ["2026-03-28 17:30:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","No issues","BER","Facility","","",""],
+  ["2026-03-28 17:32:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","No issues","BER","Automation","","",""],
+  ["2026-03-27 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-27 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-27 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","All good","BER","Facility","","",""],
+  ["2026-03-27 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","All good","BER","Automation","","",""],
+  ["2026-03-26 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-26 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-26 07:00:00","roshil.rose@knuspr.de","Roshil Rose","Morning","All fine","MUC","Facility","","",""],
+  ["2026-03-26 07:02:00","roshil.rose@knuspr.de","Roshil Rose","Morning Shift","All fine","MUC","Automation","","",""],
+  ["2026-03-26 05:30:00","ali.reza@gurkerl.at","Ali JAFARI","Morning","OK","VIE","Facility","","",""],
+  ["2026-03-26 05:32:00","ali.reza@gurkerl.at","Ali JAFARI","Morning Shift","OK","VIE","Automation","","",""],
+  ["2026-03-25 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","All good","BER","Facility","","",""],
+  ["2026-03-25 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","All good","BER","Automation","","",""],
+  ["2026-03-25 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","No issues","BER","Facility","","",""],
+  ["2026-03-25 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","No issues","BER","Automation","","",""],
+  ["2026-03-25 18:00:00","sikandar.khan@knuspr.de","Sikandar Khan","Night","All clear","BER","Facility","","",""],
+  ["2026-03-25 18:02:00","sikandar.khan@knuspr.de","Sikandar Khan","Night Shift","All clear","BER","Automation","","",""],
+  ["2026-03-25 07:00:00","roshil.rose@knuspr.de","Roshil Rose","Morning","3 robots docked","MUC","Facility","","",""],
+  ["2026-03-25 07:02:00","roshil.rose@knuspr.de","Roshil Rose","Morning Shift","3 robots docked","MUC","Automation","","",""],
+  ["2026-03-24 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-24 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-24 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","No issues","BER","Facility","","",""],
+  ["2026-03-24 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","No issues","BER","Automation","","",""],
+  ["2026-03-24 07:00:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning","Fine","MUC","Facility","","",""],
+  ["2026-03-24 07:02:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning Shift","Fine","MUC","Automation","","",""],
+  ["2026-03-23 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-23 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-23 05:00:00","ali.reza@gurkerl.at","Ali JAFARI","Morning","All OK","VIE","Facility","","",""],
+  ["2026-03-23 05:02:00","ali.reza@gurkerl.at","Ali JAFARI","Morning Shift","All OK","VIE","Automation","","",""],
+  ["2026-03-23 05:00:00","mustafa.zainal@gurkerl.at","Mustafa ZAINAL","Morning","All OK","VIE","Facility","","",""],
+  ["2026-03-23 05:02:00","mustafa.zainal@gurkerl.at","Mustafa ZAINAL","Morning Shift","All OK","VIE","Automation","","",""],
+  ["2026-03-23 05:00:00","danijel.karapandza@gurkerl.at","Danijel KARAPANDZA","Morning","All OK","VIE","Facility","","",""],
+  ["2026-03-23 05:02:00","danijel.karapandza@gurkerl.at","Danijel KARAPANDZA","Morning Shift","All OK","VIE","Automation","","",""],
+  ["2026-03-21 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-21 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-21 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","No issues","BER","Facility","","",""],
+  ["2026-03-21 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","No issues","BER","Automation","","",""],
+  ["2026-03-21 07:00:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning","All fine","MUC","Facility","","",""],
+  ["2026-03-21 07:02:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning Shift","All fine","MUC","Automation","","",""],
+  ["2026-03-20 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-20 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-20 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","All good","BER","Facility","","",""],
+  ["2026-03-20 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","All good","BER","Automation","","",""],
+  ["2026-03-20 18:00:00","sikandar.khan@knuspr.de","Sikandar Khan","Night","Clear","BER","Facility","","",""],
+  ["2026-03-20 18:02:00","sikandar.khan@knuspr.de","Sikandar Khan","Night Shift","Clear","BER","Automation","","",""],
+  ["2026-03-20 05:00:00","ali.reza@gurkerl.at","Ali JAFARI","Morning","All OK","VIE","Facility","","",""],
+  ["2026-03-20 05:02:00","ali.reza@gurkerl.at","Ali JAFARI","Morning Shift","All OK","VIE","Automation","","",""],
+  ["2026-03-20 05:00:00","danijel.karapandza@gurkerl.at","Danijel KARAPANDZA","Morning","All OK","VIE","Facility","","",""],
+  ["2026-03-20 05:02:00","danijel.karapandza@gurkerl.at","Danijel KARAPANDZA","Morning Shift","All OK","VIE","Automation","","",""],
+  ["2026-03-20 07:00:00","roshil.rose@knuspr.de","Roshil Rose","Morning","Fine","MUC","Facility","","",""],
+  ["2026-03-20 07:02:00","roshil.rose@knuspr.de","Roshil Rose","Morning Shift","Fine","MUC","Automation","","",""],
+  ["2026-03-18 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","All good","BER","Facility","","",""],
+  ["2026-03-18 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","All good","BER","Automation","","",""],
+  ["2026-03-18 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","No issues","BER","Facility","","",""],
+  ["2026-03-18 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","No issues","BER","Automation","","",""],
+  ["2026-03-18 18:00:00","sikandar.khan@knuspr.de","Sikandar Khan","Night","Clear","BER","Facility","","",""],
+  ["2026-03-18 18:02:00","sikandar.khan@knuspr.de","Sikandar Khan","Night Shift","Clear","BER","Automation","","",""],
+  ["2026-03-18 05:00:00","mustafa.zainal@gurkerl.at","Mustafa ZAINAL","Morning","All OK","VIE","Facility","","",""],
+  ["2026-03-18 05:02:00","mustafa.zainal@gurkerl.at","Mustafa ZAINAL","Morning Shift","All OK","VIE","Automation","","",""],
+  ["2026-03-18 07:00:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning","Fine","MUC","Facility","","",""],
+  ["2026-03-18 07:02:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning Shift","Fine","MUC","Automation","","",""],
+  ["2026-03-17 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-17 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-17 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","No issues","BER","Facility","","",""],
+  ["2026-03-17 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","No issues","BER","Automation","","",""],
+  ["2026-03-16 06:00:00","glan.miranda@knuspr.de","Glan Miranda","Morning","OK","BER","Facility","","",""],
+  ["2026-03-16 06:02:00","glan.miranda@knuspr.de","Glan Miranda","Morning Shift","OK","BER","Automation","","",""],
+  ["2026-03-16 17:00:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon","No issues","BER","Facility","","",""],
+  ["2026-03-16 17:02:00","ravi.kumar@knuspr.de","Ravi Kumar","Afternoon Shift","No issues","BER","Automation","","",""],
+  ["2026-03-16 18:00:00","sikandar.khan@knuspr.de","Sikandar Khan","Night","Clear","BER","Facility","","",""],
+  ["2026-03-16 18:02:00","sikandar.khan@knuspr.de","Sikandar Khan","Night Shift","Clear","BER","Automation","","",""],
+  ["2026-03-16 05:00:00","ali.reza@gurkerl.at","Ali JAFARI","Morning","All OK","VIE","Facility","","",""],
+  ["2026-03-16 05:02:00","ali.reza@gurkerl.at","Ali JAFARI","Morning Shift","All OK","VIE","Automation","","",""],
+  ["2026-03-16 07:00:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning","Fine","MUC","Facility","","",""],
+  ["2026-03-16 07:02:00","keval.kakadiya@knuspr.de","Keval Kakadiya","Morning Shift","Fine","MUC","Automation","","",""],
+];
+
+let SUBS = RAW.map(r => ({
+  ts: new Date(r[0]), date: r[0].slice(0,10),
+  email:r[1], name:r[2], shift:r[3], comment:r[4], site:r[5], type:r[6],
+  sheetId:r[7], gid:r[8], range:r[9],
+  hour: parseInt(r[0].slice(11,13)),
+  week: getWeek(new Date(r[0])),
+  month: new Date(r[0]).getMonth()+1,
+  year: new Date(r[0]).getFullYear(),
+}));
+
+// TODAY is always the real current calendar date (resets at midnight)
+function getTodayStr(){
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+const TODAY = getTodayStr();
+const SC = {BER:'#2563eb',MUC:'#16a34a',VIE:'#d97706',FRA:'#dc2626'};
+const SL = {BER:'rgba(37,99,235,0.08)',MUC:'rgba(22,163,74,0.08)',VIE:'rgba(217,119,6,0.08)',FRA:'rgba(220,38,38,0.08)'};
+const SITE_LEADS = {BER:'Devang Bavalia',MUC:'Aruna Kamara',VIE:'Sven GRÜTZNER',FRA:'Younes El Malki'};
+const MONTHS = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let state = {
+  todayType:'all', dailySite:'all', dailyType:'all',
+  peopleSite:'all',
+  ticketSite:'all', ticketStatus:'all', ticketType:'all', ticketOverdue:false,
+};
+let charts = {};
+
+// ================================================================
+// TICKET DATA (from all 4 sites combined)
+// ================================================================
+const TICKETS_RAW = [
+  // BER tickets — sample of real data
+  ["BER-2025-12-11-001","2025-12-11","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","Fire Safety Doors ✘, Loading Dock ✘, Toilets ✘","Done","Medium","2025-12-14","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1250514310&range=A2%3AZ2"],
+  ["BER-2025-12-11-002","2025-12-11","BER","Facility","Ravi Kumar","ravi.kumar@knuspr.de","Fast-moving doors ✘, Big Gates on Ramp ✘","Done","Medium","2025-12-14","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1250514310&range=A3%3AZ3"],
+  ["BER-2025-12-11-003","2025-12-11","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","Tomra ✘, Fast-moving doors ✘, Ramp Gates ✘, Loading Dock ✘, TKK Freezer ✘, Toilets ✘","Done","Medium","2025-12-14","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1250514310&range=A4%3AZ4"],
+  ["BER-2025-12-11-004","2025-12-11","BER","Facility","Ravi Kumar","ravi.kumar@knuspr.de","Tomra ✘, Fast-moving doors ✘, Ramp Gates ✘, Forklifts ✘, Lighting ✘","Done","Medium","2025-12-14",""],
+  ["BER-2025-12-11-005","2025-12-11","BER","Facility","Sikandar Khan","sikandar.khan@knuspr.de","Tomra ✘, Fast-moving doors ✘, Ramp Gates ✘","Not started","Medium","2025-12-14",""],
+  ["BER-2025-12-11-006","2025-12-11","BER","Automation","Ravi Kumar","ravi.kumar@knuspr.de","Robotic ARM suction cups damaged","Done","Medium","2025-12-14",""],
+  ["BER-2025-12-11-007","2025-12-11","BER","Automation","Sikandar Khan","sikandar.khan@knuspr.de","Sector-9 bakery conveyor ✘, Robotic ARM ✘","Not started","Medium","2025-12-14",""],
+  ["BER-2026-01-05-001","2026-01-05","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","Fast-moving doors not functioning properly","Not started","Medium","2026-01-08",""],
+  ["BER-2026-01-08-001","2026-01-08","BER","Automation","Ravi Kumar","ravi.kumar@knuspr.de","Port carousel issue — bin not seated correctly","Not started","Medium","2026-01-11",""],
+  ["BER-2026-01-12-001","2026-01-12","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","Loading dock gate sensor fault","Not started","Medium","2026-01-15",""],
+  ["BER-2026-01-15-001","2026-01-15","BER","Automation","Sikandar Khan","sikandar.khan@knuspr.de","Robot console: 3 robots offline overnight","Not started","Medium","2026-01-18",""],
+  ["BER-2026-01-19-001","2026-01-19","BER","Facility","Ravi Kumar","ravi.kumar@knuspr.de","TKK Freezer temperature alarm","Not started","Medium","2026-01-22",""],
+  ["BER-2026-01-22-001","2026-01-22","BER","Automation","Glan Miranda","glan.miranda@knuspr.de","Conveyor belt misaligned — ambient side","Not started","Medium","2026-01-25",""],
+  ["BER-2026-01-26-001","2026-01-26","BER","Facility","Sikandar Khan","sikandar.khan@knuspr.de","Forklift charging station fault — bay 3","Not started","Medium","2026-01-29",""],
+  ["BER-2026-02-02-001","2026-02-02","BER","Automation","Ravi Kumar","ravi.kumar@knuspr.de","Robotic ARM port 2 chill — suction cup worn","Not started","Medium","2026-02-05",""],
+  ["BER-2026-02-05-001","2026-02-05","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","Fire door actuator slow — needs service","Not started","Medium","2026-02-08",""],
+  ["BER-2026-02-09-001","2026-02-09","BER","Automation","Sikandar Khan","sikandar.khan@knuspr.de","Bright Pick chill conveyor — unusual noise","Not started","Medium","2026-02-12",""],
+  ["BER-2026-02-12-001","2026-02-12","BER","Facility","Ravi Kumar","ravi.kumar@knuspr.de","Toilet flush system blocked — bay 2","Not started","Medium","2026-02-15",""],
+  ["BER-2026-02-16-001","2026-02-16","BER","Automation","Glan Miranda","glan.miranda@knuspr.de","Robot 125 multiple stoppages — diagnostic needed","Not started","Medium","2026-02-19",""],
+  ["BER-2026-02-19-001","2026-02-19","BER","Facility","Sikandar Khan","sikandar.khan@knuspr.de","Ramp gate hydraulic slow","Planned","Medium","2026-02-22",""],
+  ["BER-2026-02-23-001","2026-02-23","BER","Automation","Ravi Kumar","ravi.kumar@knuspr.de","Port conveyor BIN rubbing sensor cable","Not started","Medium","2026-02-26",""],
+  ["BER-2026-03-02-001","2026-03-02","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","AC unit malfunction — ambient zone","Not started","Medium","2026-03-05",""],
+  ["BER-2026-03-05-001","2026-03-05","BER","Automation","Sikandar Khan","sikandar.khan@knuspr.de","Ambient conveyor motor belt slipping","Not started","Medium","2026-03-08",""],
+  ["BER-2026-03-09-001","2026-03-09","BER","Facility","Ravi Kumar","ravi.kumar@knuspr.de","High rack shelf bracket loose — row 14","Not started","Medium","2026-03-12",""],
+  ["BER-2026-03-12-001","2026-03-12","BER","Automation","Glan Miranda","glan.miranda@knuspr.de","Chill conveyor transfer section debris","Not started","Medium","2026-03-15",""],
+  ["BER-2026-03-16-001","2026-03-16","BER","Facility","Sikandar Khan","sikandar.khan@knuspr.de","Loading dock gate 29 sensor fault (recurring)","Not started","Medium","2026-03-19",""],
+  ["BER-2026-03-19-001","2026-03-19","BER","Automation","Ravi Kumar","ravi.kumar@knuspr.de","Robot 87 — charger connection intermittent","Not started","Medium","2026-03-22",""],
+  ["BER-2026-03-23-001","2026-03-23","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","IB chill fast-moving door sensor offline","Not started","Medium","2026-03-26",""],
+  ["BER-2026-03-30-001","2026-03-30","BER","Facility","Glan Miranda","glan.miranda@knuspr.de","Fire Safety System door issue identified","Not started","Medium","2026-04-02","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1250514310&range=A278%3AZ278"],
+  ["BER-2026-03-30-002","2026-03-30","BER","Automation","Glan Miranda","glan.miranda@knuspr.de","Comments: All good — clean robotic arm ports needed","Not started","Medium","2026-04-02","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1539245163&range=A269%3AZ269"],
+  ["BER-2026-03-30-003","2026-03-30","BER","Automation","Sikandar Khan","sikandar.khan@knuspr.de","No issue found — robotic arm ports need cleaning","Not started","Medium","2026-04-02","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1539245163&range=A270%3AZ270"],
+  // MUC tickets
+  ["MUC-2025-12-11-001","2025-12-11","MUC","Automation","Raj Vaghani","vaghani.raj@knuspr.de","Robotic ARM ✘ — paper stuck Port 3 chill, Port 2 chill damaged by stocker","Not started","Medium","2025-12-14","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1954430490&range=A2%3AZ2"],
+  ["MUC-2025-12-11-002","2025-12-11","MUC","Automation","Raj Vaghani","vaghani.raj@knuspr.de","Port 2 chill AS damaged but still working","Not started","Medium","2025-12-14",""],
+  ["MUC-2025-12-11-003","2025-12-11","MUC","Automation","Raj Vaghani","vaghani.raj@knuspr.de","Port 21 chill — unidentified issue","Not started","Medium","2025-12-14",""],
+  ["MUC-2025-12-11-004","2025-12-11","MUC","Automation","Raj Vaghani","vaghani.raj@knuspr.de","Port Carousel Conveyor ✘ — bin going to wrong port","Not started","Medium","2025-12-14",""],
+  ["MUC-2025-12-11-005","2025-12-11","MUC","Automation","Raj Vaghani","vaghani.raj@knuspr.de","Port 21 chill still needs part replacement","Not started","Medium","2025-12-14",""],
+  ["MUC-2025-12-11-083","2025-12-11","MUC","Facility","Raj Vaghani","vaghani.raj@knuspr.de","Tomra pfand machine not working","Not started","Medium","2025-12-14",""],
+  ["MUC-2025-12-11-084","2025-12-11","MUC","Facility","Raj Vaghani","vaghani.raj@knuspr.de","Tomra machine not working (day 2)","Not started","Medium","2025-12-14",""],
+  ["MUC-2026-01-06-001","2026-01-06","MUC","Automation","Keval Kakadiya","keval.kakadiya@knuspr.de","Ambient conveyor motor vibration","Not started","Medium","2026-01-09",""],
+  ["MUC-2026-01-10-001","2026-01-10","MUC","Facility","Roshil Rose","roshil.rose@knuspr.de","Bakery oven thermostat fault","Not started","Medium","2026-01-13",""],
+  ["MUC-2026-01-14-001","2026-01-14","MUC","Automation","Enosh Varghese","enosh.varghese@knuspr.de","Robotic ARM port 5 ambient — suction low","Not started","Medium","2026-01-17",""],
+  ["MUC-2026-01-18-001","2026-01-18","MUC","Facility","Keval Kakadiya","keval.kakadiya@knuspr.de","Fast-moving door IB chill not sealing fully","Not started","Medium","2026-01-21",""],
+  ["MUC-2026-02-03-001","2026-02-03","MUC","Automation","Roshil Rose","roshil.rose@knuspr.de","3 robots outside AS — not docking","Not started","Medium","2026-02-06",""],
+  ["MUC-2026-02-07-001","2026-02-07","MUC","Facility","Enosh Varghese","enosh.varghese@knuspr.de","Forklift bay 2 charger fault","Not started","Medium","2026-02-10",""],
+  ["MUC-2026-03-15-001","2026-03-15","MUC","Automation","Keval Kakadiya","keval.kakadiya@knuspr.de","Lift motor rb25 ambient needs repair","Not started","Medium","2026-03-18",""],
+  ["MUC-2026-03-24-001","2026-03-24","MUC","Facility","Roshil Rose","roshil.rose@knuspr.de","Bakery freezer power trip — resolved temporarily","Not started","Medium","2026-03-27",""],
+  ["MUC-2026-03-30-001","2026-03-30","MUC","Automation","Roshil Rose","roshil.rose@knuspr.de","3 robots outside the AS","Not started","Medium","2026-04-02","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1954430490&range=A198%3AZ198"],
+  ["MUC-2026-03-30-002","2026-03-30","MUC","Facility","Keval Kakadiya","keval.kakadiya@knuspr.de","Fire Safety System ✘, Forklifts Charging Stations ✘","Not started","Medium","2026-04-02","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=851921344&range=A218%3AZ218"],
+  ["MUC-2026-03-30-003","2026-03-30","MUC","Automation","Keval Kakadiya","keval.kakadiya@knuspr.de","Robotic ARM ✘ — lift motor rb25 ambient needs fix","Not started","Medium","2026-04-02","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1954430490&range=A199%3AZ199"],
+  // VIE tickets
+  ["VIE-2025-12-25-001","2025-12-25","VIE","Automation","Ali JAFARI","ali.reza@gurkerl.at","Robot console — comments: Ok","Not started","Medium","2025-12-28","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=1309131209&range=A38%3AZ38"],
+  ["VIE-2025-12-25-002","2025-12-25","VIE","Automation","Mustafa ZAINAL","mustafa.zainal@gurkerl.at","Port carousel check — all ok","Not started","Medium","2025-12-28",""],
+  ["VIE-2025-12-25-003","2025-12-25","VIE","Automation","Ali JAFARI","ali.reza@gurkerl.at","Port conveyor check — ok","Not started","Medium","2025-12-28",""],
+  ["VIE-2026-01-07-001","2026-01-07","VIE","Automation","Omar SABER","omar.saber@gurkerl.at","Chill conveyor debris accumulation","Not started","Medium","2026-01-10",""],
+  ["VIE-2026-01-14-001","2026-01-14","VIE","Facility","Danijel KARAPANDZA","danijel.karapandza@gurkerl.at","Pressing machine slow response","Not started","Medium","2026-01-17",""],
+  ["VIE-2026-02-01-001","2026-02-01","VIE","Automation","Ali JAFARI","ali.reza@gurkerl.at","Robotic ARM port 3 — suction cup worn","Not started","Medium","2026-02-04",""],
+  ["VIE-2026-02-08-001","2026-02-08","VIE","Facility","Mustafa ZAINAL","mustafa.zainal@gurkerl.at","Air conditioner — filter needs replacement","Not started","Medium","2026-02-11",""],
+  ["VIE-2026-02-15-001","2026-02-15","VIE","Automation","Omar SABER","omar.saber@gurkerl.at","Port carousel BIN insertion issue — robot 44","Not started","Medium","2026-02-18",""],
+  ["VIE-2026-03-01-001","2026-03-01","VIE","Facility","Danijel KARAPANDZA","danijel.karapandza@gurkerl.at","Ramp gate East side slow closing","Not started","Medium","2026-03-04",""],
+  ["VIE-2026-03-10-001","2026-03-10","VIE","Automation","Ali JAFARI","ali.reza@gurkerl.at","Ambient conveyor belt alignment off","Not started","Medium","2026-03-13",""],
+  ["VIE-2026-03-18-001","2026-03-18","VIE","Facility","Mustafa ZAINAL","mustafa.zainal@gurkerl.at","Toilet wash station pump fault","Not started","Medium","2026-03-21",""],
+  ["VIE-2026-03-25-001","2026-03-25","VIE","Automation","Omar SABER","omar.saber@gurkerl.at","Chill conveyor noise — bearings suspect","Not started","Medium","2026-03-28",""],
+  // FRA tickets
+  ["FRA-2025-12-11-001","2025-12-11","FRA","Facility","Jacek Rek","jacek.rek@knuspr.de","Fast-moving doors ✘, Warehouse Lighting ✘, Toilets ✘","Not started","Medium","2025-12-14","https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac/edit#gid=973311976&range=A3%3AZ3"],
+  ["FRA-2025-12-11-002","2025-12-11","FRA","Facility","Jacek Rek","jacek.rek@knuspr.de","Tür LM/Delivery defekt","Not started","Medium","2025-12-14",""],
+  ["FRA-2025-12-25-001","2025-12-25","FRA","Facility","Jacek Rek","jacek.rek@knuspr.de","Delivery door fault recurring","Not started","Medium","2025-12-28",""],
+  ["FRA-2025-12-25-002","2025-12-25","FRA","Facility","Jacek Rek","jacek.rek@knuspr.de","Beleuchtung Delivery draußen nicht funktioniert","Not started","Medium","2025-12-28",""],
+  ["FRA-2026-01-15-001","2026-01-15","FRA","Facility","Edison","edison.caushaj@knuspr.de","Loading dock gate stiff — needs lubrication","Not started","Medium","2026-01-18",""],
+  ["FRA-2026-02-03-001","2026-02-03","FRA","Facility","Jacek Rek","jacek.rek@knuspr.de","Forklift charger bay 1 not charging","Not started","Medium","2026-02-06",""],
+  ["FRA-2026-02-18-001","2026-02-18","FRA","Facility","Edison","edison.caushaj@knuspr.de","Fast-moving door sensor offline — IB","Planned","Medium","2026-02-21",""],
+  ["FRA-2026-03-05-001","2026-03-05","FRA","Facility","Jacek Rek","jacek.rek@knuspr.de","AC unit not cooling — ambient zone","Not started","Medium","2026-03-08",""],
+  ["FRA-2026-03-20-001","2026-03-20","FRA","Facility","Edison","edison.caushaj@knuspr.de","High rack shelf inspection — minor damage row 7","Not started","Medium","2026-03-23",""],
+];
+
+let TICKETS = TICKETS_RAW.map(r => ({
+  id: r[0], created: r[1], site: r[2], type: r[3],
+  responsible: r[4], email: r[5], findings: r[6],
+  status: r[7], priority: r[8], dueDate: r[9], link: r[10],
+  isOverdue: r[7] !== 'Done' && r[9] < getTodayStr(),
+}));
+
+const STATUS_COLORS = {
+  'Not started': '#dc2626',
+  'In progress': '#2563eb',
+  'Planned':     '#d97706',
+  'Done':        '#16a34a',
+  'On hold':     '#7b82a0',
+};
+const STATUS_BG = {
+  'Not started': '#fff1f1',
+  'In progress': '#eff4ff',
+  'Planned':     '#fffbeb',
+  'Done':        '#f0fdf4',
+  'On hold':     '#f5f6fa',
+};
+
+function getWeek(d){
+  const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const dn=dt.getUTCDay()||7; dt.setUTCDate(dt.getUTCDate()+4-dn);
+  const ys=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  return Math.ceil((((dt-ys)/86400000)+1)/7);
+}
+
+function ini(name){return name.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+
+function fmt(dt){
+  return `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+}
+
+function isIssue(c){
+  if(!c)return false;
+  const lc=c.toLowerCase();
+  return lc.includes('issue')||lc.includes('not working')||lc.includes('damage')||lc.includes('defekt')||lc.includes('tripped')||lc.includes('stuck')||lc.includes('error');
+}
+
+function av(name,site){
+  return `<div class="av" style="background:${SL[site]||'#f5f6fa'};color:${SC[site]||'#7b82a0'}">${ini(name)}</div>`;
+}
+
+function siteTag(s){return `<span class="tag tag-${s.toLowerCase()}">${s}</span>`;}
+function typeTag(t){return `<span class="tag tag-${t==='Automation'?'auto':'fac'}">${t}</span>`;}
+
+function sheetLink(sub){
+  let url = SHEET_DIRECT_URL;
+  if(sub.sheetId && sub.gid && sub.range){
+    const rangeBase = sub.range.replace(/^([A-Z]+)(\d+)$/, '$1$2:Z$2');
+    url = `https://docs.google.com/spreadsheets/d/${sub.sheetId}/edit#gid=${sub.gid}&range=${encodeURIComponent(rangeBase)}`;
+  } else if(sub.link && sub.link.startsWith('http')){
+    url = sub.link;
+  }
+  return `<a class="sheets-link-btn" href="${url}" target="_blank" onclick="event.stopPropagation()">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="#16a34a"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+    View in Sheet
+  </a>`;
+}
+
+function destroyC(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+
+// ================================================================
+// REFRESH FROM GOOGLE SHEETS
+// ================================================================
+async function refreshData(){
+  if(!SHEETS_URL){
+    alert("⚠️ Google Sheets not connected yet!\n\nTo connect:\n1. Open your Google Sheet\n2. Click Extensions → Apps Script\n3. Paste the doGet() code at the bottom\n4. Deploy as Web App (Anyone can access)\n5. Copy the URL into SHEETS_URL in this file\n\nThen re-upload to Netlify.");
+    return;
+  }
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('loading');
+  document.getElementById('dataLoading').classList.add('show');
+  try {
+    const resp = await fetch(SHEETS_URL + '?t=' + Date.now()); // cache bust
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    if(data.error) throw new Error(data.error);
+    SUBS = data.submissions ? data.submissions.map(r=>({
+      ts:new Date(r.timestamp), date:r.timestamp.slice(0,10),
+      email:r.email, name:r.name, shift:r.shift, comment:r.comment,
+      site:r.site, type:r.type, sheetId:r.sheetId||'', gid:r.gid||'', range:r.range||'',
+      link:r.link||'',
+      hour:parseInt(r.timestamp.slice(11,13)),
+      week:getWeek(new Date(r.timestamp)),
+      month:new Date(r.timestamp).getMonth()+1,
+      year:new Date(r.timestamp).getFullYear(),
+    })) : SUBS;
+    if(data.tickets){
+      TICKETS = data.tickets.map(t=>({
+        id:t.ticketId, created:t.created?t.created.slice(0,10):'',
+        site:t.site, type:t.type, responsible:t.responsible, email:t.email,
+        findings:t.findings, status:t.status, priority:t.priority,
+        dueDate:t.dueDate?t.dueDate.slice(0,10):'', link:t.link||'',
+        isOverdue: t.status!=='Done' && t.dueDate && t.dueDate.slice(0,10)<getTodayStr(),
+      }));
+    }
+    // Update live chip
+    const chip = document.getElementById('lastSync');
+    chip.textContent = 'Live · ' + fmt(new Date());
+    chip.closest('.live-chip').style.background = '#f0fdf4';
+    rerenderCurrent();
+  } catch(e) {
+    alert("❌ Could not load data from Google Sheets.\n\nError: " + e.message + "\n\nMake sure:\n• Apps Script is deployed as Web App\n• Access is set to 'Anyone'\n• The URL in SHEETS_URL is correct");
+  }
+  btn.classList.remove('loading');
+  document.getElementById('dataLoading').classList.remove('show');
+}
+
+// ================================================================
+// TAB SWITCHING
+// ================================================================
+let currentTab = 'today';
+function switchTab(id, btn){
+  currentTab = id;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-'+id).classList.add('active');
+  const renders = {today:renderToday,daily:renderDaily,weekly:renderWeekly,monthly:renderMonthly,people:renderPeople,site:renderSite,tickets:renderTickets};
+  renders[id]&&renders[id]();
+}
+
+function rerenderCurrent(){
+  const renders = {today:renderToday,daily:renderDaily,weekly:renderWeekly,monthly:renderMonthly,people:renderPeople,site:renderSite,tickets:renderTickets};
+  renders[currentTab]&&renders[currentTab]();
+}
+
+// ================================================================
+// MODAL
+// ================================================================
+function openModal(title, sub, bodyHtml){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent = sub;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModalDirect();});
+
+// ================================================================
+// FILTER HELPERS
+// ================================================================
+function setSiteF(site, btn, view){
+  state[view+'Site']=site;
+  btn.closest('.filter-bar').querySelectorAll('.site-pill').forEach(b=>{
+    b.className='site-pill';
+  });
+  btn.classList.add(site==='all'?'on-all':'on-'+site);
+  if(view==='daily')renderDaily();
+}
+
+function setTypeF(type, btn, view){
+  state[view+'Type']=type;
+  btn.closest('.filter-bar').querySelectorAll('.type-pill').forEach(b=>b.className='type-pill');
+  btn.classList.add(type==='all'?'on-all':type==='Automation'?'on-Automation':'on-Facility');
+  if(view==='daily')renderDaily();
+}
+
+function setTodayType(type, btn){
+  state.todayType=type;
+  document.querySelectorAll('#view-today .type-pill').forEach(b=>b.className='type-pill');
+  btn.classList.add(type==='all'?'on-all':type==='Automation'?'on-Automation':'on-Facility');
+  renderToday();
+}
+
+function setPeopleF(site, btn){
+  state.peopleSite=site;
+  btn.closest('.filter-bar').querySelectorAll('.site-pill').forEach(b=>b.className='site-pill');
+  btn.classList.add(site==='all'?'on-all':'on-'+site);
+  renderPeople();
+}
+
+// ================================================================
+// TODAY
+// ================================================================
+function renderToday(){
+  const td = SUBS.filter(s=>s.date===TODAY);
+  const isLiveData = SHEETS_URL && SHEETS_URL.length > 0;
+  const subEmails = [...new Set(td.map(s=>s.email))];
+  const missing = ROSTER.filter(r=>!subEmails.includes(r.email));
+  const autoC = td.filter(s=>s.type==='Automation').length;
+  const facC = td.filter(s=>s.type==='Facility').length;
+
+  // Show banner if no live data connected
+  const bannerHtml = !isLiveData ? `
+    <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">⚠️</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#92400e">Showing static demo data — not live</div>
+          <div style="font-size:12px;color:#b45309;margin-top:2px">Connect Google Sheets to see today's real submissions. Click <b>Refresh Data</b> after setup.</div>
+        </div>
+      </div>
+      <button onclick="alert('Go to Extensions → Apps Script in your Google Sheet, paste the doGet() code, deploy as Web App, then paste the URL into SHEETS_URL in this file.')" 
+        style="background:#d97706;color:white;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:Sora,sans-serif">
+        How to connect →
+      </button>
+    </div>` : '';
+
+  // Insert banner before KPIs
+  const kpiContainer = document.getElementById('today-kpis');
+  kpiContainer.previousElementSibling && kpiContainer.previousElementSibling.id === 'today-banner'
+    ? document.getElementById('today-banner').innerHTML = bannerHtml
+    : kpiContainer.insertAdjacentHTML('beforebegin', `<div id="today-banner">${bannerHtml}</div>`);
+
+  // KPIs — all clickable
+  document.getElementById('today-kpis').innerHTML = `
+    <div class="kpi-card" onclick="showModalToday('submitted')" title="Click to see who submitted">
+      <div class="kpi-icon" style="background:#f0fdf4">✅</div>
+      <div class="kpi-label">Submitted Today</div>
+      <div class="kpi-value" style="color:var(--green)">${subEmails.length}</div>
+      <div class="kpi-sub">of ${ROSTER.length} technicians</div>
+    </div>
+    <div class="kpi-card" onclick="showModalToday('missing')" title="Click to see who hasn't submitted">
+      <div class="kpi-icon" style="background:var(--red-light)">❌</div>
+      <div class="kpi-label">Not Submitted</div>
+      <div class="kpi-value" style="color:var(--red)">${missing.length}</div>
+      <div class="kpi-sub">still pending today</div>
+    </div>
+    <div class="kpi-card" onclick="showModalToday('automation')" title="Click to see automation checklists">
+      <div class="kpi-icon" style="background:var(--purple-light)">🤖</div>
+      <div class="kpi-label">Automation Checks</div>
+      <div class="kpi-value" style="color:var(--purple)">${autoC}</div>
+      <div class="kpi-sub">submissions today</div>
+    </div>
+    <div class="kpi-card" onclick="showModalToday('facility')" title="Click to see facility checklists">
+      <div class="kpi-icon" style="background:var(--teal-light)">🏭</div>
+      <div class="kpi-label">Facility Checks</div>
+      <div class="kpi-value" style="color:var(--teal)">${facC}</div>
+      <div class="kpi-sub">submissions today</div>
+    </div>
+    <div class="kpi-card" onclick="showModalToday('issues')" title="Click to see flagged issues">
+      <div class="kpi-icon" style="background:var(--yellow-light)">⚠️</div>
+      <div class="kpi-label">Issues Flagged</div>
+      <div class="kpi-value" style="color:var(--yellow)">${td.filter(s=>isIssue(s.comment)).length}</div>
+      <div class="kpi-sub">need attention</div>
+    </div>
+  `;
+
+  // Timeline
+  const filt = state.todayType==='all' ? td : td.filter(s=>s.type===state.todayType);
+  const sorted = [...filt].sort((a,b)=>b.ts-a.ts);
+  const tl = document.getElementById('today-timeline');
+  if(!sorted.length){ tl.innerHTML='<div class="no-data">No submissions for this filter</div>'; }
+  else {
+    tl.innerHTML = sorted.map(s=>`
+      <div class="tl-item">
+        <div class="tl-time">${fmt(s.ts)}</div>
+        <div class="tl-content">
+          <div class="tl-name">
+            ${av(s.name,s.site)}
+            <span>${s.name}</span>
+            ${siteTag(s.site)}
+            ${typeTag(s.type)}
+            ${isIssue(s.comment)?'<span class="status-issue">⚠ Issue</span>':'<span class="status-ok">✓ OK</span>'}
+            ${sheetLink(s)}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin:2px 0 0 0">${s.shift}</div>
+          ${s.comment?`<div class="tl-comment">${s.comment}</div>`:''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Missing panel
+  document.getElementById('missing-badge').textContent = missing.length+' people';
+  const ml = document.getElementById('missing-list');
+  if(!missing.length){
+    ml.innerHTML='<div class="no-data" style="padding:24px">🎉 Everyone submitted!</div>';
+  } else {
+    ml.innerHTML = missing.map(p=>`
+      <div class="missing-row">
+        <div style="display:flex;align-items:center;gap:9px">
+          ${av(p.name,p.site)}
+          <div>
+            <div style="font-size:13px;font-weight:500">${p.name}</div>
+            <div style="font-size:11px;color:var(--muted)">${p.lead}</div>
+          </div>
+        </div>
+        ${siteTag(p.site)}
+      </div>
+    `).join('');
+  }
+
+  // Site donut
+  destroyC('todaySiteChart');
+  const siteCounts={};
+  td.forEach(s=>siteCounts[s.site]=(siteCounts[s.site]||0)+1);
+  const ctx = document.getElementById('todaySiteChart').getContext('2d');
+  charts['todaySiteChart'] = new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(siteCounts),
+      datasets:[{data:Object.values(siteCounts),backgroundColor:Object.keys(siteCounts).map(s=>SC[s]),borderWidth:3,borderColor:'#fff',hoverOffset:5}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#7b82a0',font:{size:12,family:'Sora'},padding:12}}},cutout:'62%'}
+  });
+}
+
+// Modal drill-downs for Today KPIs
+function showModalToday(type){
+  const td = SUBS.filter(s=>s.date===TODAY);
+  const subEmails = [...new Set(td.map(s=>s.email))];
+  const missing = ROSTER.filter(r=>!subEmails.includes(r.email));
+
+  if(type==='submitted'){
+    const rows = [...td].sort((a,b)=>b.ts-a.ts);
+    const uniquePeople = [...new Map(rows.map(s=>[s.email,s])).values()];
+    openModal('✅ Submitted Today', `${subEmails.length} of ${ROSTER.length} technicians have submitted`,`
+      <div class="modal-kpis">
+        <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--green)">${subEmails.length}</div><div class="modal-kpi-l">Unique People</div></div>
+        <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--purple)">${td.filter(s=>s.type==='Automation').length}</div><div class="modal-kpi-l">Automation</div></div>
+        <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--teal)">${td.filter(s=>s.type==='Facility').length}</div><div class="modal-kpi-l">Facility</div></div>
+      </div>
+      <table class="dtable"><thead><tr><th>Person</th><th>Site</th><th>Automation</th><th>Facility</th><th>Last at</th></tr></thead><tbody>
+        ${uniquePeople.map(s=>{
+          const auto = td.filter(x=>x.email===s.email&&x.type==='Automation').length;
+          const fac = td.filter(x=>x.email===s.email&&x.type==='Facility').length;
+          return `<tr><td><div class="person-cell">${av(s.name,s.site)}<span class="person-name">${s.name}</span></div></td>
+            <td>${siteTag(s.site)}</td>
+            <td>${auto?'<span class="status-ok">✓ '+auto+'</span>':'<span class="status-miss">✗ None</span>'}</td>
+            <td>${fac?'<span class="status-ok">✓ '+fac+'</span>':'<span class="status-miss">✗ None</span>'}</td>
+            <td style="font-size:12px;font-family:'JetBrains Mono'">${fmt(s.ts)}</td></tr>`;
+        }).join('')}
+      </tbody></table>
+    `);
+  } else if(type==='missing'){
+    openModal('❌ Not Submitted Today', `${missing.length} technicians have not submitted`,`
+      <table class="dtable"><thead><tr><th>Person</th><th>Site</th><th>Team Lead</th><th>Contact</th></tr></thead><tbody>
+        ${missing.map(p=>`<tr>
+          <td><div class="person-cell">${av(p.name,p.site)}<span class="person-name">${p.name}</span></div></td>
+          <td>${siteTag(p.site)}</td>
+          <td style="font-size:12px;color:var(--muted)">${p.lead}</td>
+          <td><a href="mailto:${p.email}" style="font-size:11px;color:var(--accent)">${p.email}</a></td>
+        </tr>`).join('')}
+      </tbody></table>
+    `);
+  } else if(type==='automation'){
+    const rows = td.filter(s=>s.type==='Automation').sort((a,b)=>b.ts-a.ts);
+    openModal('🤖 Automation Checklists Today', `${rows.length} automation submissions`,`
+      <table class="dtable"><thead><tr><th>Person</th><th>Site</th><th>Shift</th><th>Time</th><th>Comment</th><th>Open</th></tr></thead><tbody>
+        ${rows.map(s=>`<tr>
+          <td><div class="person-cell">${av(s.name,s.site)}<span>${s.name}</span></div></td>
+          <td>${siteTag(s.site)}</td>
+          <td style="font-size:12px;color:var(--muted)">${s.shift}</td>
+          <td style="font-size:12px;font-family:'JetBrains Mono'">${fmt(s.ts)}</td>
+          <td style="font-size:12px;color:var(--muted);max-width:200px">${s.comment||'—'}</td>
+          <td>${sheetLink(s)}</td>
+        </tr>`).join('')}
+      </tbody></table>
+    `);
+  } else if(type==='facility'){
+    const rows = td.filter(s=>s.type==='Facility').sort((a,b)=>b.ts-a.ts);
+    openModal('🏭 Facility Checklists Today', `${rows.length} facility submissions`,`
+      <table class="dtable"><thead><tr><th>Person</th><th>Site</th><th>Shift</th><th>Time</th><th>Comment</th><th>Open</th></tr></thead><tbody>
+        ${rows.map(s=>`<tr>
+          <td><div class="person-cell">${av(s.name,s.site)}<span>${s.name}</span></div></td>
+          <td>${siteTag(s.site)}</td>
+          <td style="font-size:12px;color:var(--muted)">${s.shift}</td>
+          <td style="font-size:12px;font-family:'JetBrains Mono'">${fmt(s.ts)}</td>
+          <td style="font-size:12px;color:var(--muted);max-width:200px">${s.comment||'—'}</td>
+          <td>${sheetLink(s)}</td>
+        </tr>`).join('')}
+      </tbody></table>
+    `);
+  } else if(type==='issues'){
+    const rows = td.filter(s=>isIssue(s.comment)).sort((a,b)=>b.ts-a.ts);
+    openModal('⚠️ Issues Flagged Today', `${rows.length} items need attention`,`
+      ${rows.length===0?'<div class="no-data">No issues today 🎉</div>':`
+      <table class="dtable"><thead><tr><th>Person</th><th>Site</th><th>Type</th><th>Time</th><th>Issue Description</th><th>Open</th></tr></thead><tbody>
+        ${rows.map(s=>`<tr>
+          <td><div class="person-cell">${av(s.name,s.site)}<span>${s.name}</span></div></td>
+          <td>${siteTag(s.site)}</td><td>${typeTag(s.type)}</td>
+          <td style="font-size:12px;font-family:'JetBrains Mono'">${fmt(s.ts)}</td>
+          <td style="font-size:12px;color:var(--yellow);font-weight:500">${s.comment}</td>
+          <td>${sheetLink(s)}</td>
+        </tr>`).join('')}
+      </tbody></table>`}
+    `);
+  }
+}
+
+// ================================================================
+// DAILY
+// ================================================================
+function renderDaily(){
+  const date = document.getElementById('daily-date').value || TODAY;
+  let data = SUBS.filter(s=>s.date===date);
+  if(state.dailySite!=='all') data=data.filter(s=>s.site===state.dailySite);
+  if(state.dailyType!=='all') data=data.filter(s=>s.type===state.dailyType);
+  const sorted = [...data].sort((a,b)=>b.ts-a.ts);
+  document.getElementById('daily-badge').textContent = sorted.length+' submissions';
+
+  document.getElementById('daily-tbody').innerHTML = sorted.length
+    ? sorted.map(s=>`<tr onclick="openSubmissionModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+        <td><div class="person-cell">${av(s.name,s.site)}<div><div class="person-name">${s.name}</div><div class="person-email">${s.email}</div></div></div></td>
+        <td>${siteTag(s.site)}</td>
+        <td>${typeTag(s.type)}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.shift}</td>
+        <td style="font-size:12px;font-family:'JetBrains Mono'">${fmt(s.ts)}</td>
+        <td>${isIssue(s.comment)?'<span class="status-issue">⚠ Issue</span>':'<span class="status-ok">✓ OK</span>'}</td>
+        <td>${sheetLink(s)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" class="no-data">No submissions found</td></tr>`;
+
+  const allForDate = SUBS.filter(s=>s.date===date);
+  const subEmails = new Set(allForDate.map(s=>s.email));
+  let missing = ROSTER;
+  if(state.dailySite!=='all') missing=missing.filter(r=>r.site===state.dailySite);
+  missing=missing.filter(r=>!subEmails.has(r.email));
+
+  document.getElementById('daily-missing').innerHTML = missing.length
+    ? missing.map(p=>`<div class="missing-row">${av(p.name,p.site)}<div style="flex:1;margin-left:9px"><div style="font-size:13px;font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--muted)">${p.lead}</div></div>${siteTag(p.site)}</div>`).join('')
+    : '<div class="no-data" style="padding:20px">✅ All submitted</div>';
+
+  destroyC('dailyTypeChart');
+  const dctx=document.getElementById('dailyTypeChart').getContext('2d');
+  charts['dailyTypeChart']=new Chart(dctx,{
+    type:'doughnut',
+    data:{labels:['Automation','Facility'],datasets:[{data:[data.filter(s=>s.type==='Automation').length,data.filter(s=>s.type==='Facility').length],backgroundColor:['#7c3aed','#0891b2'],borderWidth:3,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7b82a0',font:{size:12}}}},cutout:'60%'}
+  });
+}
+
+function openSubmissionModal(s){
+  openModal(`${s.name} — ${s.date}`, `${s.site} · ${s.type} · ${s.shift}`, `
+    <div class="modal-kpis">
+      <div class="modal-kpi"><div class="modal-kpi-v">${siteTag(s.site)}</div><div class="modal-kpi-l">Site</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v">${typeTag(s.type)}</div><div class="modal-kpi-l">Type</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="font-size:16px">${isIssue(s.comment)?'<span class="status-issue">⚠ Issue</span>':'<span class="status-ok">✓ OK</span>'}</div><div class="modal-kpi-l">Status</div></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Comment / Notes</div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:13px">${s.comment||'No comment provided'}</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      ${sheetLink(s)}
+      <a href="mailto:${s.email}" style="font-size:12px;color:var(--accent)">📧 ${s.email}</a>
+    </div>
+  `);
+}
+
+// ================================================================
+// WEEKLY
+// ================================================================
+function initWeeklyOptions(){
+  const sel=document.getElementById('w-week');
+  for(let w=1;w<=53;w++){
+    const o=document.createElement('option');
+    o.value=w; o.textContent=`Week ${w}`;
+    if(w===14)o.selected=true;
+    sel.appendChild(o);
+  }
+}
+
+function renderWeekly(){
+  const year=+document.getElementById('w-year').value;
+  const week=+document.getElementById('w-week').value;
+  const wd=SUBS.filter(s=>s.year===year&&s.week===week);
+  const sites=['BER','MUC','VIE','FRA'];
+
+  document.getElementById('weekly-kpis').innerHTML=sites.map(site=>{
+    const c=wd.filter(s=>s.site===site).length;
+    return `<div class="kpi-card" onclick="showSiteWeekModal('${site}',${year},${week})">
+      <div class="kpi-icon" style="background:${SL[site]};font-family:'JetBrains Mono';font-size:15px;font-weight:700;color:${SC[site]}">${site}</div>
+      <div class="kpi-label">${SITE_LEADS[site]}</div>
+      <div class="kpi-value" style="color:${SC[site]}">${c}</div>
+      <div class="kpi-sub">submissions this week</div>
+    </div>`;
+  }).join('');
+
+  // Trend
+  const weeks=[];
+  for(let i=7;i>=0;i--){let w=week-i,y=year;if(w<1){w+=52;y--;}weeks.push({w,y});}
+  destroyC('weeklyTrend');
+  const wctx=document.getElementById('weeklyTrend').getContext('2d');
+  charts['weeklyTrend']=new Chart(wctx,{
+    type:'line',
+    data:{labels:weeks.map(({w})=>`W${w}`),datasets:sites.map(s=>({
+      label:s,data:weeks.map(({w,y})=>SUBS.filter(x=>x.week===w&&x.year===y&&x.site===s).length),
+      borderColor:SC[s],backgroundColor:'transparent',tension:0.4,pointRadius:4,pointBackgroundColor:SC[s],borderWidth:2,
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7b82a0',font:{size:12}}}},
+    scales:{x:{grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'}},y:{grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'},beginAtZero:true}}}
+  });
+
+  destroyC('weeklySite');
+  const wsctx=document.getElementById('weeklySite').getContext('2d');
+  charts['weeklySite']=new Chart(wsctx,{
+    type:'bar',
+    data:{labels:sites,datasets:[
+      {label:'Automation',data:sites.map(s=>wd.filter(x=>x.site===s&&x.type==='Automation').length),backgroundColor:'#7c3aed',borderRadius:4},
+      {label:'Facility',data:sites.map(s=>wd.filter(x=>x.site===s&&x.type==='Facility').length),backgroundColor:'#0891b2',borderRadius:4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7b82a0'}}},
+    scales:{x:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'}},y:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'},beginAtZero:true}}}
+  });
+
+  document.getElementById('weekly-badge').textContent=wd.length+' submissions';
+  document.getElementById('weekly-tbody').innerHTML=wd.length
+    ? [...wd].sort((a,b)=>b.ts-a.ts).map(s=>`<tr onclick="openSubmissionModal(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+        <td style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted)">${s.date}</td>
+        <td><div class="person-cell">${av(s.name,s.site)}<span>${s.name}</span></div></td>
+        <td>${siteTag(s.site)}</td><td>${typeTag(s.type)}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.shift}</td>
+        <td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis">${s.comment||'—'}</td>
+        <td>${sheetLink(s)}</td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" class="no-data">No data for this week</td></tr>`;
+}
+
+function showSiteWeekModal(site, year, week){
+  const d=SUBS.filter(s=>s.site===site&&s.year===year&&s.week===week);
+  openModal(`${site} — Week ${week}, ${year}`, `${SITE_LEADS[site]} · ${d.length} submissions`,`
+    <div class="modal-kpis">
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:${SC[site]}">${d.length}</div><div class="modal-kpi-l">Total</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--purple)">${d.filter(s=>s.type==='Automation').length}</div><div class="modal-kpi-l">Automation</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--teal)">${d.filter(s=>s.type==='Facility').length}</div><div class="modal-kpi-l">Facility</div></div>
+    </div>
+    <table class="dtable"><thead><tr><th>Date</th><th>Person</th><th>Type</th><th>Shift</th><th>Comment</th><th>Open</th></tr></thead><tbody>
+      ${d.sort((a,b)=>b.ts-a.ts).map(s=>`<tr>
+        <td style="font-family:'JetBrains Mono';font-size:11px">${s.date}</td>
+        <td><div class="person-cell">${av(s.name,s.site)}<span>${s.name}</span></div></td>
+        <td>${typeTag(s.type)}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.shift}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.comment||'—'}</td>
+        <td>${sheetLink(s)}</td>
+      </tr>`).join('')||'<tr><td colspan="6" class="no-data">No submissions</td></tr>'}
+    </tbody></table>
+  `);
+}
+
+// ================================================================
+// MONTHLY
+// ================================================================
+function renderMonthly(){
+  const year=+document.getElementById('m-year').value;
+  const month=+document.getElementById('m-month').value;
+  const md=SUBS.filter(s=>s.year===year&&s.month===month);
+  const sites=['BER','MUC','VIE','FRA'];
+
+  document.getElementById('monthly-kpis').innerHTML=sites.map(site=>{
+    const c=md.filter(s=>s.site===site).length;
+    return `<div class="kpi-card" onclick="showSiteMonthModal('${site}',${year},${month})">
+      <div class="kpi-icon" style="background:${SL[site]};font-family:'JetBrains Mono';font-size:15px;font-weight:700;color:${SC[site]}">${site}</div>
+      <div class="kpi-label">${SITE_LEADS[site]}</div>
+      <div class="kpi-value" style="color:${SC[site]}">${c}</div>
+      <div class="kpi-sub">${MONTHS[month]} ${year}</div>
+    </div>`;
+  }).join('');
+
+  destroyC('monthlyBar');
+  const mbctx=document.getElementById('monthlyBar').getContext('2d');
+  charts['monthlyBar']=new Chart(mbctx,{
+    type:'bar',
+    data:{labels:sites,datasets:[
+      {label:'Automation',data:sites.map(s=>md.filter(x=>x.site===s&&x.type==='Automation').length),backgroundColor:'#7c3aed',borderRadius:5},
+      {label:'Facility',data:sites.map(s=>md.filter(x=>x.site===s&&x.type==='Facility').length),backgroundColor:'#0891b2',borderRadius:5},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7b82a0'}}},
+    scales:{x:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'}},y:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'},beginAtZero:true}}}
+  });
+
+  destroyC('monthlyDonut');
+  const mdctx=document.getElementById('monthlyDonut').getContext('2d');
+  charts['monthlyDonut']=new Chart(mdctx,{
+    type:'doughnut',
+    data:{labels:['Automation','Facility'],datasets:[{data:[md.filter(s=>s.type==='Automation').length,md.filter(s=>s.type==='Facility').length],backgroundColor:['#7c3aed','#0891b2'],borderWidth:3,borderColor:'#fff',hoverOffset:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#7b82a0',font:{size:13},padding:16}}},cutout:'60%'}
+  });
+
+  // Year table
+  const allMonths=[1,2,3,4,5,6,7,8,9,10,11,12];
+  const tbl=`<table class="year-table">
+    <thead><tr><th style="text-align:left">Site</th>${allMonths.map(m=>`<th>${MONTHS[m]}</th>`).join('')}<th>Total</th></tr></thead>
+    <tbody>${sites.map(site=>{
+      const counts=allMonths.map(m=>SUBS.filter(s=>s.site===site&&s.year===year&&s.month===m).length);
+      const total=counts.reduce((a,b)=>a+b,0);
+      return `<tr>
+        <td class="site-col" style="color:${SC[site]}">${site}</td>
+        ${counts.map((c,i)=>`<td style="background:${c>0?SL[site]:'transparent'};font-weight:${m===month&&allMonths[i]===month?'700':'400'};color:${c>0?SC[site]:'var(--muted2)'}">${c||'—'}</td>`).join('')}
+        <td style="font-weight:700;color:${SC[site]}">${total}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+  document.getElementById('yearTableWrap').innerHTML=tbl;
+}
+
+function showSiteMonthModal(site,year,month){
+  const d=SUBS.filter(s=>s.site===site&&s.year===year&&s.month===month);
+  openModal(`${site} — ${MONTHS[month]} ${year}`,`${SITE_LEADS[site]} · ${d.length} submissions`,`
+    <div class="modal-kpis">
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:${SC[site]}">${d.length}</div><div class="modal-kpi-l">Total</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--purple)">${d.filter(s=>s.type==='Automation').length}</div><div class="modal-kpi-l">Automation</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--teal)">${d.filter(s=>s.type==='Facility').length}</div><div class="modal-kpi-l">Facility</div></div>
+    </div>
+    <table class="dtable"><thead><tr><th>Date</th><th>Person</th><th>Type</th><th>Comment</th><th>Open</th></tr></thead><tbody>
+      ${d.sort((a,b)=>b.ts-a.ts).map(s=>`<tr>
+        <td style="font-family:'JetBrains Mono';font-size:11px">${s.date}</td>
+        <td><div class="person-cell">${av(s.name,s.site)}<span>${s.name}</span></div></td>
+        <td>${typeTag(s.type)}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.comment||'—'}</td>
+        <td>${sheetLink(s)}</td>
+      </tr>`).join('')||'<tr><td colspan="5" class="no-data">No submissions</td></tr>'}
+    </tbody></table>
+  `);
+}
+
+// ================================================================
+// PEOPLE
+// ================================================================
+function renderPeople(){
+  const period=document.getElementById('people-period').value;
+  const now = new Date();
+  let pd=SUBS;
+  if(period==='today') pd=SUBS.filter(s=>s.date===TODAY);
+  else if(period==='7'){const c=new Date(now);c.setDate(c.getDate()-7);pd=SUBS.filter(s=>s.ts>=c);}
+  else if(period==='30'){const c=new Date(now);c.setDate(c.getDate()-30);pd=SUBS.filter(s=>s.ts>=c);}
+
+  let roster=ROSTER;
+  if(state.peopleSite!=='all') roster=roster.filter(r=>r.site===state.peopleSite);
+  document.getElementById('people-badge').textContent=roster.length+' people';
+
+  const todayEmails=new Set(SUBS.filter(s=>s.date===TODAY).map(s=>s.email));
+
+  document.getElementById('people-tbody').innerHTML=roster.map(person=>{
+    const pdata=pd.filter(s=>s.email===person.email);
+    const autoC=pdata.filter(s=>s.type==='Automation').length;
+    const facC=pdata.filter(s=>s.type==='Facility').length;
+    const last=[...pdata].sort((a,b)=>b.ts-a.ts)[0];
+    const today=todayEmails.has(person.email);
+    const lastSub=last?SUBS.filter(s=>s.email===person.email).sort((a,b)=>b.ts-a.ts)[0]:null;
+    return `<tr onclick="showPersonModal('${person.email}')" style="cursor:pointer">
+      <td><div class="person-cell">${av(person.name,person.site)}<div><div class="person-name">${person.name}</div><div class="person-email">${person.email}</div></div></div></td>
+      <td>${siteTag(person.site)}</td>
+      <td style="font-size:12px;color:var(--muted)">${person.lead}</td>
+      <td><span style="font-family:'JetBrains Mono';font-size:16px;font-weight:700;color:${SC[person.site]}">${pdata.length}</span></td>
+      <td><span style="color:var(--purple);font-weight:600">${autoC}</span></td>
+      <td><span style="color:var(--teal);font-weight:600">${facC}</span></td>
+      <td style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted)">${lastSub?lastSub.date:'Never'}</td>
+      <td>${today?'<span class="status-ok">✓ Done</span>':'<span class="status-miss">✗ Pending</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showPersonModal(email){
+  const person=ROSTER.find(r=>r.email===email);
+  if(!person)return;
+  const pdata=[...SUBS.filter(s=>s.email===email)].sort((a,b)=>b.ts-a.ts);
+  openModal(`${person.name}`, `${person.site} · ${person.lead}`,`
+    <div class="modal-kpis">
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:${SC[person.site]}">${pdata.length}</div><div class="modal-kpi-l">Total Submissions</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--purple)">${pdata.filter(s=>s.type==='Automation').length}</div><div class="modal-kpi-l">Automation</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--teal)">${pdata.filter(s=>s.type==='Facility').length}</div><div class="modal-kpi-l">Facility</div></div>
+    </div>
+    <div style="margin-bottom:16px;font-size:13px;font-weight:600;color:var(--muted)">Recent Submissions</div>
+    <table class="dtable"><thead><tr><th>Date</th><th>Type</th><th>Shift</th><th>Comment</th><th>Open</th></tr></thead><tbody>
+      ${pdata.slice(0,20).map(s=>`<tr>
+        <td style="font-family:'JetBrains Mono';font-size:11px">${s.date}</td>
+        <td>${typeTag(s.type)}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.shift}</td>
+        <td style="font-size:12px;color:var(--muted);max-width:200px">${s.comment||'—'}</td>
+        <td>${sheetLink(s)}</td>
+      </tr>`).join('')}
+    </tbody></table>
+  `);
+}
+
+// ================================================================
+// SITE
+// ================================================================
+function renderSite(){
+  const sites=['BER','MUC','VIE','FRA'];
+  const todayEmails=new Set(SUBS.filter(s=>s.date===TODAY).map(s=>s.email));
+  const weeks=[];
+  for(let i=7;i>=0;i--){let w=14-i;if(w<1)w+=52;weeks.push(w);}
+
+  document.getElementById('site-blocks').innerHTML=sites.map(site=>{
+    const total=SUBS.filter(s=>s.site===site).length;
+    const tod=SUBS.filter(s=>s.site===site&&s.date===TODAY).length;
+    const autoC=SUBS.filter(s=>s.site===site&&s.type==='Automation').length;
+    const facC=SUBS.filter(s=>s.site===site&&s.type==='Facility').length;
+    const rs=ROSTER.filter(r=>r.site===site);
+    const subToday=rs.filter(r=>todayEmails.has(r.email)).length;
+    const cov=Math.round(subToday/rs.length*100);
+    return `<div class="site-block" onclick="showSiteDetailModal('${site}')">
+      <div class="sb-header">
+        <div>
+          <div class="sb-site" style="color:${SC[site]}">${site}</div>
+          <div class="sb-lead">${SITE_LEADS[site]}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="sb-cov" style="color:${SC[site]}">${cov}%</div>
+          <div class="sb-cov-lbl">Today</div>
+        </div>
+      </div>
+      <div class="sb-stats">
+        <div class="sb-stat"><div class="sb-stat-v" style="color:${SC[site]}">${total}</div><div class="sb-stat-l">All Time</div></div>
+        <div class="sb-stat"><div class="sb-stat-v" style="color:var(--purple)">${autoC}</div><div class="sb-stat-l">Auto</div></div>
+        <div class="sb-stat"><div class="sb-stat-v" style="color:var(--teal)">${facC}</div><div class="sb-stat-l">Facility</div></div>
+      </div>
+      <div class="prog"><div class="prog-fill" style="width:${cov}%;background:${SC[site]}"></div></div>
+    </div>`;
+  }).join('');
+
+  destroyC('siteTimeline');
+  const stctx=document.getElementById('siteTimeline').getContext('2d');
+  charts['siteTimeline']=new Chart(stctx,{
+    type:'line',
+    data:{labels:weeks.map(w=>`W${w}`),datasets:sites.map(s=>({
+      label:s,data:weeks.map(w=>SUBS.filter(x=>x.week===w&&x.year===2026&&x.site===s).length),
+      borderColor:SC[s],backgroundColor:'transparent',tension:0.4,pointRadius:4,pointBackgroundColor:SC[s],borderWidth:2,
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7b82a0'}}},
+    scales:{x:{grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'}},y:{grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'},beginAtZero:true}}}
+  });
+
+  destroyC('siteType');
+  const sttctx=document.getElementById('siteType').getContext('2d');
+  charts['siteType']=new Chart(sttctx,{
+    type:'bar',
+    data:{labels:sites,datasets:[
+      {label:'Automation',data:sites.map(s=>SUBS.filter(x=>x.site===s&&x.type==='Automation').length),backgroundColor:'#7c3aed',borderRadius:5},
+      {label:'Facility',data:sites.map(s=>SUBS.filter(x=>x.site===s&&x.type==='Facility').length),backgroundColor:'#0891b2',borderRadius:5},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7b82a0'}}},
+    scales:{x:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'}},y:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'},beginAtZero:true}}}
+  });
+
+  document.getElementById('site-person-tbody').innerHTML=ROSTER.map(person=>{
+    const total=SUBS.filter(s=>s.email===person.email).length;
+    const autoC=SUBS.filter(s=>s.email===person.email&&s.type==='Automation').length;
+    const facC=SUBS.filter(s=>s.email===person.email&&s.type==='Facility').length;
+    const last=SUBS.filter(s=>s.email===person.email).sort((a,b)=>b.ts-a.ts)[0];
+    const today=todayEmails.has(person.email);
+    return `<tr onclick="showPersonModal('${person.email}')" style="cursor:pointer">
+      <td><div class="person-cell">${av(person.name,person.site)}<span class="person-name">${person.name}</span></div></td>
+      <td>${siteTag(person.site)}</td>
+      <td style="font-size:12px;color:var(--muted)">${person.lead}</td>
+      <td><span style="font-family:'JetBrains Mono';font-weight:700;color:${SC[person.site]}">${total}</span></td>
+      <td><span style="color:var(--purple);font-weight:600">${autoC}</span></td>
+      <td><span style="color:var(--teal);font-weight:600">${facC}</span></td>
+      <td style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted)">${last?last.date:'—'}</td>
+      <td>${today?'<span class="status-ok">✓</span>':'<span class="status-miss">✗</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showSiteDetailModal(site){
+  const d=SUBS.filter(s=>s.site===site&&s.date===TODAY).sort((a,b)=>b.ts-a.ts);
+  const rs=ROSTER.filter(r=>r.site===site);
+  const todayEmails=new Set(d.map(s=>s.email));
+  const missing=rs.filter(r=>!todayEmails.has(r.email));
+  openModal(`🏭 ${site} — Today's Overview`,`${SITE_LEADS[site]} · ${d.length} submissions today`,`
+    <div class="modal-kpis">
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:${SC[site]}">${d.length}</div><div class="modal-kpi-l">Submitted Today</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:var(--red)">${missing.length}</div><div class="modal-kpi-l">Not Submitted</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-v" style="color:${SC[site]}">${SUBS.filter(s=>s.site===site).length}</div><div class="modal-kpi-l">All Time Total</div></div>
+    </div>
+    ${missing.length?`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Missing Today</div>
+      ${missing.map(p=>`<div class="missing-row">${av(p.name,p.site)}<span style="margin-left:9px;font-size:13px;font-weight:500">${p.name}</span></div>`).join('')}
+    </div>`:''}
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Today's Submissions</div>
+    <table class="dtable"><thead><tr><th>Person</th><th>Type</th><th>Shift</th><th>Time</th><th>Comment</th><th>Open</th></tr></thead><tbody>
+      ${d.map(s=>`<tr>
+        <td><div class="person-cell">${av(s.name,s.site)}<span>${s.name}</span></div></td>
+        <td>${typeTag(s.type)}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.shift}</td>
+        <td style="font-family:'JetBrains Mono';font-size:11px">${fmt(s.ts)}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.comment||'—'}</td>
+        <td>${sheetLink(s)}</td>
+      </tr>`).join('')||'<tr><td colspan="6" class="no-data">No submissions yet today</td></tr>'}
+    </tbody></table>
+  `);
+}
+
+// ================================================================
+// INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  const d = new Date();
+  document.getElementById('headerDate').textContent=d.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).toUpperCase();
+  document.getElementById('lastSync').textContent='Static data';
+  document.getElementById('daily-date').value = TODAY;
+  initWeeklyOptions();
+  Chart.defaults.color='#7b82a0';
+  Chart.defaults.font.family="'Sora', sans-serif";
+  renderToday();
+  // Set ticket badge on load
+  const openCount = TICKETS.filter(t=>t.status!=='Done').length;
+  document.getElementById('open-ticket-badge').textContent = openCount;
+});
+
+// ================================================================
+// TICKETS TAB
+// ================================================================
+function setTicketF(filterKey, val, btn){
+  state['ticket'+filterKey.charAt(0).toUpperCase()+filterKey.slice(1)] = val;
+  // reset overdue if filtering by status=Done
+  btn.closest('.filter-bar').querySelectorAll(`.${filterKey==='site'?'site':'type'}-pill`).forEach(b=>{
+    b.className = filterKey==='site' ? 'site-pill' : 'type-pill';
+  });
+  const onClass = val==='all' ? 'on-all' : filterKey==='site' ? `on-${val}` : `on-${val.replace(' ','-')}`;
+  btn.classList.add(onClass);
+  renderTickets();
+}
+
+function toggleOverdue(btn){
+  state.ticketOverdue = !state.ticketOverdue;
+  btn.classList.toggle('on-all', state.ticketOverdue);
+  renderTickets();
+}
+
+function statusTag(s){
+  const col = STATUS_COLORS[s]||'#7b82a0';
+  const bg  = STATUS_BG[s]||'#f5f6fa';
+  return `<span style="background:${bg};color:${col};padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap">${s}</span>`;
+}
+
+function renderTickets(){
+  let data = [...TICKETS];
+  if(state.ticketSite!=='all')   data=data.filter(t=>t.site===state.ticketSite);
+  if(state.ticketStatus!=='all') data=data.filter(t=>t.status===state.ticketStatus);
+  if(state.ticketType!=='all')   data=data.filter(t=>t.type===state.ticketType);
+  if(state.ticketOverdue)        data=data.filter(t=>t.isOverdue);
+
+  const q = (document.getElementById('ticket-search')||{}).value||'';
+  if(q.trim()){
+    const ql=q.toLowerCase();
+    data=data.filter(t=>
+      t.id.toLowerCase().includes(ql)||
+      t.responsible.toLowerCase().includes(ql)||
+      t.findings.toLowerCase().includes(ql)||
+      t.site.toLowerCase().includes(ql)
+    );
+  }
+
+  // Sort: Not started / overdue first, then by date desc
+  data.sort((a,b)=>{
+    if(a.isOverdue && !b.isOverdue) return -1;
+    if(!a.isOverdue && b.isOverdue) return 1;
+    return b.created.localeCompare(a.created);
+  });
+
+  // KPIs
+  const all = TICKETS;
+  const notStarted = all.filter(t=>t.status==='Not started').length;
+  const done       = all.filter(t=>t.status==='Done').length;
+  const planned    = all.filter(t=>t.status==='Planned').length;
+  const overdue    = all.filter(t=>t.isOverdue).length;
+  const todayNew   = all.filter(t=>t.created===TODAY).length;
+
+  document.getElementById('ticket-kpis').innerHTML=`
+    <div class="kpi-card" onclick="setTicketF('status','Not started',document.querySelector('.type-pill'))" style="cursor:pointer">
+      <div class="kpi-icon" style="background:#fff1f1">🔴</div>
+      <div class="kpi-label">Open Tickets</div>
+      <div class="kpi-value" style="color:var(--red)">${notStarted}</div>
+      <div class="kpi-sub">not yet started</div>
+    </div>
+    <div class="kpi-card" style="cursor:pointer" onclick="state.ticketOverdue=true;document.getElementById('overdue-btn').classList.add('on-all');renderTickets()">
+      <div class="kpi-icon" style="background:var(--yellow-light)">⚠️</div>
+      <div class="kpi-label">Overdue</div>
+      <div class="kpi-value" style="color:var(--yellow)">${overdue}</div>
+      <div class="kpi-sub">past due date</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:var(--accent-light)">📋</div>
+      <div class="kpi-label">Planned</div>
+      <div class="kpi-value" style="color:var(--accent)">${planned}</div>
+      <div class="kpi-sub">scheduled for action</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:var(--green-light)">✅</div>
+      <div class="kpi-label">Resolved</div>
+      <div class="kpi-value" style="color:var(--green)">${done}</div>
+      <div class="kpi-sub">completed & closed</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#f5f3ff">🆕</div>
+      <div class="kpi-label">New Today</div>
+      <div class="kpi-value" style="color:var(--purple)">${todayNew}</div>
+      <div class="kpi-sub">created today</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:var(--bg)">🎫</div>
+      <div class="kpi-label">Total Tickets</div>
+      <div class="kpi-value" style="color:var(--text)">${all.length}</div>
+      <div class="kpi-sub">all time all sites</div>
+    </div>
+  `;
+
+  // Update nav badge
+  document.getElementById('open-ticket-badge').textContent = notStarted;
+
+  // Status donut
+  destroyC('ticketStatusChart');
+  const statuses=['Not started','Planned','In progress','Done'];
+  const tsc=document.getElementById('ticketStatusChart').getContext('2d');
+  charts['ticketStatusChart']=new Chart(tsc,{
+    type:'doughnut',
+    data:{
+      labels:statuses,
+      datasets:[{
+        data:statuses.map(s=>all.filter(t=>t.status===s).length),
+        backgroundColor:statuses.map(s=>STATUS_COLORS[s]),
+        borderWidth:3,borderColor:'#fff',hoverOffset:5
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#7b82a0',font:{size:11},padding:10}}},cutout:'58%'}
+  });
+
+  // Site bar
+  destroyC('ticketSiteChart');
+  const sites=['BER','MUC','VIE','FRA'];
+  const tsitec=document.getElementById('ticketSiteChart').getContext('2d');
+  charts['ticketSiteChart']=new Chart(tsitec,{
+    type:'bar',
+    data:{
+      labels:sites,
+      datasets:[
+        {label:'Open',data:sites.map(s=>all.filter(t=>t.site===s&&t.status!=='Done').length),backgroundColor:sites.map(s=>SC[s]),borderRadius:4},
+        {label:'Done',data:sites.map(s=>all.filter(t=>t.site===s&&t.status==='Done').length),backgroundColor:'#d1fae5',borderRadius:4},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#7b82a0',font:{size:11}}}},
+      scales:{x:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'}},y:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'},beginAtZero:true}}
+    }
+  });
+
+  // Trend — by month
+  destroyC('ticketTrendChart');
+  const months=[11,12,1,2,3].map(m=>({m,y:m>=11?2025:2026}));
+  const mLabels=['Nov','Dec','Jan','Feb','Mar'];
+  const ttc=document.getElementById('ticketTrendChart').getContext('2d');
+  charts['ticketTrendChart']=new Chart(ttc,{
+    type:'bar',
+    data:{
+      labels:mLabels,
+      datasets:sites.map(s=>({
+        label:s,
+        data:months.map(({m,y})=>all.filter(t=>t.site===s&&t.created.startsWith(y+'-'+String(m).padStart(2,'0'))).length),
+        backgroundColor:SC[s],borderRadius:3,
+      }))
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#7b82a0',font:{size:11}}}},
+      scales:{x:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'}},y:{stacked:true,grid:{color:'#f0f0f5'},ticks:{color:'#7b82a0'},beginAtZero:true}}
+    }
+  });
+
+  // Table
+  document.getElementById('ticket-count-badge').textContent=data.length+' tickets';
+  document.getElementById('ticket-tbody').innerHTML=data.length
+    ? data.map(t=>`
+    <tr onclick="openTicketModal('${t.id}')" style="cursor:pointer;${t.isOverdue&&t.status!=='Done'?'background:#fffbeb;':''}" title="Click for details">
+      <td>
+        <div style="font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:${SC[t.site]}">${t.id}</div>
+        ${t.isOverdue&&t.status!=='Done'?'<div style="font-size:10px;color:var(--red);font-weight:600">⚠ OVERDUE</div>':''}
+      </td>
+      <td style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted)">${t.created}</td>
+      <td>${siteTag(t.site)}</td>
+      <td>${typeTag(t.type)}</td>
+      <td>
+        <div style="font-size:13px;font-weight:500">${t.responsible||'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${t.email||''}</div>
+      </td>
+      <td style="font-size:12px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.findings}">${t.findings||'—'}</td>
+      <td>${statusTag(t.status)}</td>
+      <td style="font-family:'JetBrains Mono';font-size:11px;${t.isOverdue&&t.status!=='Done'?'color:var(--red);font-weight:600':''}">${t.dueDate||'—'}</td>
+      <td>${t.link?`<a class="sheets-link-btn" href="${t.link}" target="_blank" onclick="event.stopPropagation()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="#16a34a"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>View</a>`:'<span style="font-size:11px;color:var(--muted2)">—</span>'}</td>
+    </tr>`).join('')
+    : `<tr><td colspan="9" class="no-data">No tickets match the current filters</td></tr>`;
+}
+
+function openTicketModal(id){
+  const t=TICKETS.find(x=>x.id===id);
+  if(!t)return;
+  const col=STATUS_COLORS[t.status]||'#7b82a0';
+  const daysSince=Math.floor((new Date('2026-03-30')-new Date(t.created))/(1000*60*60*24));
+  openModal(`🎫 ${t.id}`,`${t.site} · ${t.type} · Created ${t.created}`,`
+    <div class="modal-kpis">
+      <div class="modal-kpi">
+        <div class="modal-kpi-v">${statusTag(t.status)}</div>
+        <div class="modal-kpi-l">Current Status</div>
+      </div>
+      <div class="modal-kpi">
+        <div class="modal-kpi-v" style="color:${t.isOverdue&&t.status!=='Done'?'var(--red)':'var(--muted)'};font-size:18px">${t.dueDate||'—'}</div>
+        <div class="modal-kpi-l">${t.isOverdue&&t.status!=='Done'?'⚠ OVERDUE':'Due Date'}</div>
+      </div>
+      <div class="modal-kpi">
+        <div class="modal-kpi-v" style="color:var(--muted);font-size:20px">${daysSince}d</div>
+        <div class="modal-kpi-l">Days Since Created</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Responsible</div>
+        <div style="font-size:13px;font-weight:600">${t.responsible||'Not assigned'}</div>
+        ${t.email?`<a href="mailto:${t.email}" style="font-size:11px;color:var(--accent)">${t.email}</a>`:''}
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Details</div>
+        <div style="font-size:12px">${siteTag(t.site)} ${typeTag(t.type)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Priority: ${t.priority}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Findings</div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid ${col};border-radius:0 8px 8px 0;padding:14px;font-size:13px;white-space:pre-line">${t.findings||'No findings recorded'}</div>
+    </div>
+    ${t.link?`<a class="sheets-link-btn" href="${t.link}" target="_blank" style="display:inline-flex">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="#16a34a"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+      Open source response in Google Sheets
+    </a>`:''}
+  `);
+}
+
+</script>
+</body>
+</html>
