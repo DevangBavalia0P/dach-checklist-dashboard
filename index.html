@@ -1227,16 +1227,25 @@ function siteTag(s){return `<span class="tag tag-${s.toLowerCase()}">${s}</span>
 function typeTag(t){return `<span class="tag tag-${t==='Automation'?'auto':'fac'}">${t}</span>`;}
 
 function sheetLink(sub){
-  let url = SHEET_DIRECT_URL;
-  if(sub.sheetId && sub.gid && sub.range){
-    const rangeBase = sub.range.replace(/^([A-Z]+)(\d+)$/, '$1$2:Z$2');
-    url = `https://docs.google.com/spreadsheets/d/${sub.sheetId}/edit#gid=${sub.gid}&range=${encodeURIComponent(rangeBase)}`;
-  } else if(sub.link && sub.link.startsWith('http')){
+  let url = '';
+
+  // Priority 1: direct link from Google Sheets (live data)
+  if(sub.link && sub.link.startsWith('http')){
     url = sub.link;
   }
-  return `<a class="sheets-link-btn" href="${url}" target="_blank" onclick="event.stopPropagation()">
+  // Priority 2: built from sheetId + gid + range (static data)
+  else if(sub.sheetId && sub.gid && sub.range){
+    const rangeBase = sub.range.replace(/^([A-Z]+)(\d+)$/, '$1$2:Z$2');
+    url = `https://docs.google.com/spreadsheets/d/${sub.sheetId}/edit#gid=${sub.gid}&range=${encodeURIComponent(rangeBase)}`;
+  }
+  // Priority 3: fallback — open sheet homepage
+  else {
+    url = SHEET_DIRECT_URL;
+  }
+
+  return `<a class="sheets-link-btn" href="${url}" target="_blank" onclick="event.stopPropagation()" title="Open this exact response row in Google Sheets">
     <svg width="11" height="11" viewBox="0 0 24 24" fill="#16a34a"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-    View in Sheet
+    View Row
   </a>`;
 }
 
@@ -1261,8 +1270,9 @@ async function refreshData(){
     SUBS = data.submissions ? data.submissions.map(r=>({
       ts:new Date(r.timestamp), date:r.timestamp.slice(0,10),
       email:r.email, name:r.name, shift:r.shift, comment:r.comment,
-      site:r.site, type:r.type, sheetId:r.sheetId||'', gid:r.gid||'', range:r.range||'',
-      link:r.link||'',
+      site:r.site, type:r.type,
+      link: r.link || '',        // ← direct row link from Apps Script
+      sheetId:'', gid:'', range:'', // not needed when link is present
       hour:parseInt(r.timestamp.slice(11,13)),
       week:getWeek(new Date(r.timestamp)),
       month:new Date(r.timestamp).getMonth()+1,
