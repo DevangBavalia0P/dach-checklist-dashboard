@@ -1082,8 +1082,22 @@ let SUBS = RAW.map(r => ({
 
 // TODAY is always the real current calendar date (resets at midnight)
 function getTodayStr(){
+  // Uses local browser timezone — correct for your team in Europe
   const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const d = String(now.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+
+// Also fix the date comparison to use local date from timestamp
+function getDateStr(isoString){
+  if(!isoString) return '';
+  const d = new Date(isoString);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
 const TODAY = getTodayStr();
 const SC = {BER:'#2563eb',MUC:'#16a34a',VIE:'#d97706',FRA:'#dc2626'};
@@ -1268,7 +1282,7 @@ async function refreshData(){
     const data = await resp.json();
     if(data.error) throw new Error(data.error);
     SUBS = data.submissions ? data.submissions.map(r=>({
-      ts:new Date(r.timestamp), date:r.timestamp.slice(0,10),
+      ts:new Date(r.timestamp),date: getDateStr(r.timestamp),
       email:r.email, name:r.name, shift:r.shift, comment:r.comment,
       site:r.site, type:r.type,
       link: r.link || '',        // ← direct row link from Apps Script
