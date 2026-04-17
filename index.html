@@ -311,6 +311,71 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
   <div class="loader-txt" id="loaderTxt">Syncing from Google Sheets…</div>
 </div>
 
+<!-- IDENTITY GATE — shown if no name set -->
+<div id="identityGate" style="display:none;position:fixed;inset:0;background:rgba(15,18,40,.75);z-index:3000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:var(--white);border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,.3);width:min(420px,92vw);padding:32px;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)">
+
+    <!-- STEP 1: Choose name -->
+    <div id="gateStep1">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:36px;margin-bottom:10px">🔐</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:6px">Sign in to Task Hub</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6">Select your name then enter your personal PIN to continue.</div>
+      </div>
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name</label>
+      <select id="identitySelect" onchange="gateStep1Changed()" style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;outline:none;margin-bottom:16px;cursor:pointer">
+        <option value="">— Choose your name —</option>
+        <optgroup label="Team Leads">
+          <option value="Devang Bavalia|devang.bavalia@knuspr.de">Devang Bavalia (BER Lead)</option>
+          <option value="Aruna Kamara|aruna.kamara@knuspr.de">Aruna Kamara (MUC Lead)</option>
+          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at">Sven GRÜTZNER (VIE Lead)</option>
+          <option value="Younes El Malki|younes.elmalki@knuspr.de">Younes El Malki (FRA Lead)</option>
+        </optgroup>
+        <optgroup label="BER Technicians">
+          <option value="Ravi Kumar|ravi.kumar@knuspr.de">Ravi Kumar</option>
+          <option value="Florin Adrian Bordianu|florin.bordianu@knuspr.de">Florin Adrian Bordianu</option>
+          <option value="Glan Miranda|glan.miranda@knuspr.de">Glan Miranda</option>
+          <option value="Sikandar Khan|sikandar.khan@knuspr.de">Sikandar Khan</option>
+        </optgroup>
+        <optgroup label="MUC Technicians">
+          <option value="Tarun Gauniyal|tarun.gauniyal@knuspr.de">Tarun Gauniyal</option>
+          <option value="Keval Kakadiya|keval.kakadiya@knuspr.de">Keval Kakadiya</option>
+          <option value="Roshil Rose|roshil.rose@knuspr.de">Roshil Rose</option>
+          <option value="Enosh Varghese|enosh.varghese@knuspr.de">Enosh Varghese</option>
+          <option value="Jordan McGregor|jordan.mcgregor@knuspr.de">Jordan McGregor</option>
+          <option value="Yogendra Rathore|yogendra.rathore@knuspr.de">Yogendra Rathore</option>
+        </optgroup>
+        <optgroup label="VIE Technicians">
+          <option value="Omar SABER|omar.saber@gurkerl.at">Omar SABER</option>
+          <option value="Ali JAFARI|ali.reza@gurkerl.at">Ali JAFARI</option>
+          <option value="Seyedvahab MIRMOSTAFAVI|seyedvahab.mirmostafavi@gurkerl.at">Seyedvahab MIRMOSTAFAVI</option>
+          <option value="Mustafa ZAINAL|mustafa.zainal@gurkerl.at">Mustafa ZAINAL</option>
+          <option value="Danijel KARAPANDZA|danijel.karapandza@gurkerl.at">Danijel KARAPANDZA</option>
+        </optgroup>
+        <optgroup label="FRA Technicians">
+          <option value="Jacek Rek|jacek.rek@knuspr.de">Jacek Rek</option>
+          <option value="Edison|edison.caushaj@knuspr.de">Edison</option>
+          <option value="Amine Kabdani|amine.kabdani@knuspr.de">Amine Kabdani</option>
+          <option value="Shubham Rajaram Ghogare|shubham.ghogare@knuspr.de">Shubham Rajaram Ghogare</option>
+        </optgroup>
+      </select>
+
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your PIN</label>
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="6"
+        placeholder="Enter your PIN"
+        onkeydown="if(event.key==='Enter')confirmIdentity()"
+        style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:8px;outline:none;margin-bottom:6px;text-align:center;transition:border-color .15s">
+      <div id="pinError" style="color:var(--red);font-size:12px;font-weight:600;min-height:18px;margin-bottom:12px;text-align:center"></div>
+
+      <button onclick="confirmIdentity()" style="width:100%;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='var(--accent)'">
+        Enter Dashboard →
+      </button>
+      <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted)">PIN is set by your team lead · Saved in this browser after first login</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -319,40 +384,6 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
-
-<!-- CONNECT OVERLAY -->
-<div class="connect-overlay" id="connectOverlay" onclick="if(event.target===this)closeConnect()">
-  <div class="connect-box">
-    <h2>🔗 Connect Google Sheets</h2>
-    <p>Paste your Apps Script Web App URL below. Once connected, the dashboard will sync live data automatically at your chosen interval.</p>
-
-    <div class="connect-steps">
-      <div><span class="btn btn-sm" style="background:var(--accent);color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;margin-right:6px">1</span><b>Open Google Sheet</b> → Extensions → Apps Script</div>
-      <div><span class="btn btn-sm" style="background:var(--accent);color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;margin-right:6px">2</span>Paste both <b>doGet()</b> and <b>doPost()</b> functions → Save</div>
-      <div><span class="btn btn-sm" style="background:var(--accent);color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;margin-right:6px">3</span><b>Deploy → New deployment → Web app → Anyone → Deploy</b></div>
-      <div><span class="btn btn-sm" style="background:var(--accent);color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;margin-right:6px">4</span>Copy the <b>/exec URL</b> and paste below</div>
-    </div>
-
-    <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Apps Script URL (for both read & write)</label>
-    <input class="connect-field" id="sheetsUrlInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec" type="url">
-
-    <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name (for comments)</label>
-    <input class="connect-field" id="userNameInput" placeholder="e.g. Devang Bavalia" style="font-family:'Sora',sans-serif">
-
-    <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Email</label>
-    <input class="connect-field" id="userEmailInput" placeholder="e.g. devang.bavalia@knuspr.de" type="email" style="font-family:'Sora',sans-serif">
-
-    <div style="display:flex;gap:10px;margin-top:6px">
-      <button class="btn btn-primary" style="flex:1;justify-content:center;padding:10px" onclick="saveConnection()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Save & Connect
-      </button>
-      <button class="btn btn-ghost" onclick="closeConnect()">Cancel</button>
-      <button class="btn btn-ghost" style="color:var(--red)" onclick="clearConnection()">Disconnect</button>
-    </div>
-    <div id="connectStatus" style="margin-top:10px;font-size:12px;display:none"></div>
   </div>
 </div>
 
@@ -369,7 +400,7 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
 <!-- NOT CONNECTED BAR -->
 <div class="not-connected-bar" id="notConnectedBar" style="display:none">
   ⚠️ Showing sample data — not connected to Google Sheets. Changes won't be saved.
-  <button onclick="openConnect()">Connect Now →</button>
+  <button onclick="switchSec('settings',document.querySelectorAll('.sec-tab')[4])">⚙ Go to Settings →</button>
 </div>
 
 <!-- HEADER -->
@@ -395,11 +426,11 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
         <option value="1800">30 min</option>
       </select>
     </div>
-    <!-- CONNECT / SHEET BUTTON -->
-    <button class="btn btn-ghost btn-sm" id="connectBtn" onclick="openConnect()">
+    <!-- OPEN SHEET LINK (shown when connected) -->
+    <a class="btn btn-ghost btn-sm" id="openSheetBtn" href="https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac" target="_blank" style="display:none">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="#34a853"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-      <span id="connectBtnLbl">Connect Sheet</span>
-    </button>
+      Open Sheet
+    </a>
     <!-- MANUAL REFRESH -->
     <button class="btn btn-primary btn-sm" id="refreshBtn" onclick="manualRefresh()" title="Refresh now">
       <svg id="refreshIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -417,6 +448,7 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
   <button class="sec-tab" onclick="switchSec('people',this)">👤 People</button>
   <button class="sec-tab" onclick="switchSec('tickets',this)">🎫 Tickets</button>
   <button class="sec-tab" onclick="switchSec('analytics',this)">📊 Analytics</button>
+  <button class="sec-tab" onclick="switchSec('settings',this)" style="margin-left:auto">⚙ Settings</button>
 </div>
 
 <main>
@@ -586,6 +618,144 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
   </div>
 </div>
 
+<!-- ======= SETTINGS ======= -->
+<div class="view" id="view-settings">
+  <div style="max-width:680px;margin:0 auto">
+
+    <!-- CONNECTION STATUS CARD -->
+    <div class="card" style="margin-bottom:20px;overflow:visible">
+      <div class="card-hd">
+        <div class="card-title">🔗 Google Sheets Connection</div>
+        <div id="settingsStatusBadge" class="sbadge s-not">Not connected</div>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">
+            Apps Script URL
+            <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted2);margin-left:6px">— same URL is used for reading data and saving changes</span>
+          </label>
+          <div style="display:flex;gap:8px">
+            <input id="sheetsUrlInput" type="url" style="flex:1;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .15s"
+              placeholder="https://script.google.com/macros/s/AKfycb…/exec"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
+            <button class="btn btn-primary" onclick="saveConnection()" style="white-space:nowrap;padding:10px 18px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Save & Connect
+            </button>
+          </div>
+          <div id="connectStatus" style="margin-top:8px;font-size:12px;display:none"></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name (shown in comments)</label>
+            <input id="userNameInput" type="text" style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:border-color .15s"
+              placeholder="e.g. Devang Bavalia"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Email</label>
+            <input id="userEmailInput" type="email" style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:border-color .15s"
+              placeholder="e.g. devang.bavalia@knuspr.de"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;padding-top:4px">
+          <button class="btn btn-ghost btn-sm" onclick="clearConnection()" style="color:var(--red);border-color:var(--red)">Disconnect</button>
+          <a id="settingsSheetLink" href="https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac" target="_blank" class="btn btn-ghost btn-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#34a853"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            Open Google Sheet
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- AUTO REFRESH CARD -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hd"><div class="card-title">🔄 Auto-Refresh</div></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:13px;font-weight:500;margin-bottom:4px">Refresh interval</div>
+            <div style="font-size:12px;color:var(--muted)">How often the dashboard automatically syncs from Google Sheets</div>
+          </div>
+          <select onchange="changeIntervalFromSettings(this.value)" id="refreshIntervalSettings"
+            style="background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:9px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;font-weight:500;cursor:pointer;outline:none">
+            <option value="0">Off — manual only</option>
+            <option value="60">Every 1 minute</option>
+            <option value="120">Every 2 minutes</option>
+            <option value="300" selected>Every 5 minutes</option>
+            <option value="600">Every 10 minutes</option>
+            <option value="1800">Every 30 minutes</option>
+          </select>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px">
+          <div class="live-dot" id="settingsDot" style="background:var(--muted)"></div>
+          <span id="settingsRefreshStatus">Not connected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO SETUP CARD -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hd"><div class="card-title">📋 Apps Script Setup Guide</div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+        ${[
+          ['1','Open your Google Sheet','Extensions → Apps Script'],
+          ['2','Delete all existing code','Select All (Ctrl+A) → Delete'],
+          ['3','Paste the complete script','Use the DACH_AppScript_Complete.js file'],
+          ['4','Save the script','Click the 💾 Save button'],
+          ['5','Deploy as Web App','Deploy → New deployment → Web app'],
+          ['6','Set access to Anyone','Execute as: Me → Who has access: Anyone'],
+          ['7','Deploy and copy URL','Click Deploy → copy the /exec URL'],
+          ['8','Paste URL above','Enter your name and email → Save & Connect'],
+        ].map(([n,title,sub])=>`
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${n}</div>
+            <div>
+              <div style="font-size:13px;font-weight:600">${title}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:1px">${sub}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- ABOUT CARD -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-hd"><div class="card-title">ℹ️ About</div></div>
+      <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${[
+          ['Dashboard','DACH Facility Operations Task Hub'],
+          ['Sites','BER · MUC · VIE · FRA'],
+          ['Technicians','19 across all sites'],
+          ['Data source','Google Sheets (via Apps Script)'],
+          ['Write-back','Status, comments, assignments → Sheet'],
+          ['Notifications','Email on @mention'],
+        ].map(([k,v])=>`
+          <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 14px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">${k}</div>
+            <div style="font-size:13px;font-weight:500">${v}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG CARD -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">🕵️ Activity Log — Who Changed What</div>
+        <button class="btn btn-ghost btn-sm" onclick="clearActivityLog()">Clear log</button>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div id="activityLogList" style="max-height:400px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 </main>
 
 <script>
@@ -603,8 +773,9 @@ let WRITE_URL  = CFG.sheetsUrl || ""; // same URL for GET+POST
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxbrYqC0x7eT9D6RRbmHBqY9MiE65ChrINVvY9CKho2TOwitnoeYWH430QymxHD4nHaBw/exec";
 
 let CURRENT_USER = {
-  name:  CFG.userName  || "Team Lead",
-  email: CFG.userEmail || "devang.bavalia@knuspr.de"
+  name:        CFG.userName    || 'Team Lead',
+  email:       CFG.userEmail   || '',
+  pinVerified: CFG.pinVerified || false,
 };
 
 // Auto-refresh state
@@ -614,19 +785,26 @@ let refreshIntervalSec = parseInt(CFG.refreshInterval || '300');
 
 // ── Connection UI functions ────────────────────────────────────
 function openConnect(){
-  document.getElementById('sheetsUrlInput').value  = SHEETS_URL || '';
-  document.getElementById('userNameInput').value   = CURRENT_USER.name;
-  document.getElementById('userEmailInput').value  = CURRENT_USER.email;
-  document.getElementById('connectOverlay').classList.add('open');
+  // Navigate to settings tab instead of popup
+  switchSec('settings', document.querySelectorAll('.sec-tab')[4]);
 }
-function closeConnect(){
-  document.getElementById('connectOverlay').classList.remove('open');
+function closeConnect(){ /* no-op — no popup anymore */ }
+
+function changeIntervalFromSettings(val){
+  refreshIntervalSec = parseInt(val);
+  // Keep header selector in sync
+  const selH = document.getElementById('refreshInterval');
+  if(selH) selH.value = val;
+  CFG.refreshInterval = refreshIntervalSec;
+  localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
+  if(isConnected) startAutoRefresh();
+  updateConnectionUI();
 }
 
 async function saveConnection(){
-  const url   = document.getElementById('sheetsUrlInput').value.trim();
-  const name  = document.getElementById('userNameInput').value.trim();
-  const email = document.getElementById('userEmailInput').value.trim();
+  const url   = (document.getElementById('sheetsUrlInput').value||'').trim();
+  const name  = (document.getElementById('userNameInput').value||'').trim();
+  const email = (document.getElementById('userEmailInput').value||'').trim();
   const status = document.getElementById('connectStatus');
 
   if(!url || !url.includes('script.google.com')){
@@ -643,7 +821,6 @@ async function saveConnection(){
     const data = await resp.json();
     if(data.error && !data.submissions) throw new Error(data.error);
 
-    // Save to localStorage
     CFG = { sheetsUrl: url, userName: name, userEmail: email, refreshInterval: refreshIntervalSec };
     localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
 
@@ -653,9 +830,9 @@ async function saveConnection(){
 
     status.innerHTML='<span style="color:var(--green)">✅ Connected! Loading live data…</span>';
     updateConnectionUI();
-    setTimeout(()=>{ closeConnect(); refreshData(); }, 800);
+    setTimeout(()=>{ status.innerHTML=''; refreshData(); }, 800);
   } catch(e) {
-    status.innerHTML=`<span style="color:var(--red)">❌ Connection failed: ${e.message}<br><small>Make sure Apps Script is deployed as Web App with "Anyone" access.</small></span>`;
+    status.innerHTML=`<span style="color:var(--red)">❌ Failed: ${e.message}<br><small style="color:var(--muted)">Make sure the script is deployed as Web App with "Anyone" access.</small></span>`;
   }
 }
 
@@ -673,27 +850,50 @@ function updateConnectionUI(){
   const chip   = document.getElementById('refreshChip');
   const dot    = document.getElementById('refreshDot');
   const lbl    = document.getElementById('syncLbl');
-  const btn    = document.getElementById('connectBtnLbl');
   const bar    = document.getElementById('notConnectedBar');
+  const sheetBtn = document.getElementById('openSheetBtn');
+
+  // Sync settings tab fields with current values
+  const urlEl   = document.getElementById('sheetsUrlInput');
+  const nameEl  = document.getElementById('userNameInput');
+  const emailEl = document.getElementById('userEmailInput');
+  if(urlEl)   urlEl.value   = SHEETS_URL || '';
+  if(nameEl)  nameEl.value  = CURRENT_USER.name  || '';
+  if(emailEl) emailEl.value = CURRENT_USER.email || '';
+
+  // Sync interval selectors
+  const selH = document.getElementById('refreshInterval');
+  const selS = document.getElementById('refreshIntervalSettings');
+  if(selH) selH.value = String(refreshIntervalSec);
+  if(selS) selS.value = String(refreshIntervalSec);
 
   if(isConnected){
-    chip.classList.remove('paused'); chip.classList.add('refresh-chip');
     chip.style.background='var(--green-l)'; chip.style.borderColor='#bbf7d0'; chip.style.color='var(--green)';
     dot.style.background='var(--green)'; dot.style.animation='pulse 2s infinite';
     lbl.textContent = 'Live · every ' + formatInterval(refreshIntervalSec) + ' ·';
-    btn.textContent = '📋 Open Sheet';
-    document.getElementById('connectBtn').href = SHEET_URL;
-    document.getElementById('connectBtn').target = '_blank';
-    document.getElementById('connectBtn').onclick = null;
     bar.style.display = 'none';
+    if(sheetBtn) sheetBtn.style.display = 'inline-flex';
+    // Settings page status
+    const badge = document.getElementById('settingsStatusBadge');
+    if(badge){ badge.className='sbadge s-done'; badge.textContent='✓ Connected'; }
+    const sdot = document.getElementById('settingsDot');
+    if(sdot){ sdot.style.background='var(--green)'; sdot.style.animation='pulse 2s infinite'; }
+    const srs = document.getElementById('settingsRefreshStatus');
+    if(srs) srs.textContent = 'Auto-syncing every ' + formatInterval(refreshIntervalSec) + ' · click chip in header to pause';
     startAutoRefresh();
   } else {
     chip.style.background='var(--bg)'; chip.style.borderColor='var(--border2)'; chip.style.color='var(--muted)';
     dot.style.background='var(--muted)'; dot.style.animation='none';
     lbl.textContent='Not connected ·';
-    btn.textContent='Connect Sheet';
     bar.style.display='flex';
-    document.getElementById('connectBtn').onclick=openConnect;
+    if(sheetBtn) sheetBtn.style.display = 'none';
+    // Settings page status
+    const badge = document.getElementById('settingsStatusBadge');
+    if(badge){ badge.className='sbadge s-not'; badge.textContent='Not connected'; }
+    const sdot = document.getElementById('settingsDot');
+    if(sdot){ sdot.style.background='var(--muted)'; sdot.style.animation='none'; }
+    const srs = document.getElementById('settingsRefreshStatus');
+    if(srs) srs.textContent = 'Connect to Google Sheets first to enable auto-refresh';
   }
 }
 
@@ -756,8 +956,9 @@ function toggleAutoRefresh(){
 async function manualRefresh(){
   const icon = document.getElementById('refreshIcon');
   icon.style.animation='spin .8s linear infinite';
-  countdown = refreshIntervalSec; // reset countdown
-  await refreshData();
+  DATA_CACHE = null; // force fresh fetch
+  countdown = refreshIntervalSec;
+  await refreshData(true);
   icon.style.animation='';
 }
 
@@ -904,55 +1105,80 @@ function loadSampleData(){
 // ================================================================
 // REFRESH FROM GOOGLE SHEETS
 // ================================================================
-async function refreshData(){
+// ================================================================
+// DATA CACHE — avoids hammering Apps Script unnecessarily
+// ================================================================
+let DATA_CACHE = null;
+let DATA_CACHE_AT = 0;
+const CACHE_TTL_MS = 45 * 1000; // 45 seconds client-side cache
+
+async function refreshData(forceRefresh = false){
   if(!SHEETS_URL){ loadSampleData(); renderAll(); return; }
-  const btn=document.getElementById('refreshBtn');
+
+  // Return cached data if fresh and not forced
+  if(!forceRefresh && DATA_CACHE && (Date.now() - DATA_CACHE_AT) < CACHE_TTL_MS){
+    applyData(DATA_CACHE);
+    renderAll();
+    return;
+  }
+
+  const btn = document.getElementById('refreshBtn');
   btn.classList.add('spin');
   document.getElementById('loader').classList.add('show');
   try{
-    const resp = await fetch(SHEETS_URL+'?t='+Date.now());
+    // Pass days=60 so Apps Script only reads recent rows — much faster
+    const url = SHEETS_URL + '?days=60&t=' + Date.now();
+    const resp = await fetch(url);
     const data = await resp.json();
     if(data.error) throw new Error(data.error);
 
-    SUBS = (data.submissions||[]).map(r=>{
-      const localDate = getDateStr(r.timestamp); // Berlin local date YYYY-MM-DD
-      const localTs   = new Date(r.timestamp);
-      const [yr, mo, dy] = localDate.split('-').map(Number);
-      // Build a local-midnight Date for week calculation
-      const localMidnight = new Date(yr, mo-1, dy);
-      return {
-        ts: localTs,
-        date: localDate,
-        email:r.email, name:r.name, shift:r.shift, comment:r.comment,
-        site:r.site, type:r.type, link:r.link||'',
-        checklist: r.checklist||[], imgs: r.imgs||[],
-        week:  getWeek(localMidnight),
-        month: mo,
-        year:  yr,
-      };
-    });
-
-    TICKETS = (data.tickets||[]).map(t=>({
-      id:t.ticketId, created:t.created?getDateStr(t.created):'',
-      site:t.site, type:t.type, findings:t.findings, summary:t.summary,
-      status: LOCAL_STATUSES[t.ticketId] || t.status,
-      priority:t.priority,
-      responsible: LOCAL_ASSIGNED[t.ticketId] || t.responsible,
-      email:t.email, dueDate:t.dueDate?getDateStr(t.dueDate):'', link:t.link||'',
-      isOverdue: (LOCAL_STATUSES[t.ticketId]||t.status)!=='Done' && t.dueDate && getDateStr(t.dueDate)<getToday(),
-    }));
+    DATA_CACHE    = data;
+    DATA_CACHE_AT = Date.now();
+    applyData(data);
 
     const nowStr = new Date().toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit'});
-    document.getElementById('syncLbl').textContent='Synced at '+nowStr+' ·';
+    document.getElementById('syncLbl').textContent='Synced '+nowStr+' ·';
     isConnected=true;
     startAutoRefresh();
   }catch(e){
     loadSampleData();
-    alert('Could not load live data — showing sample data.\n\nError: '+e.message);
+    console.warn('Live data failed, using sample:', e.message);
   }
   btn.classList.remove('spin');
   document.getElementById('loader').classList.remove('show');
   renderAll();
+}
+
+function applyData(data){
+  SUBS = (data.submissions||[]).map(r=>{
+    const localDate     = getDateStr(r.timestamp);
+    const localTs       = new Date(r.timestamp);
+    const [yr, mo, dy]  = localDate.split('-').map(Number);
+    const localMidnight = new Date(yr, mo-1, dy);
+    return {
+      ts: localTs, date: localDate,
+      email:r.email, name:r.name, shift:r.shift, comment:r.comment,
+      site:r.site, type:r.type, link:r.link||'',
+      checklist:r.checklist||[], imgs:r.imgs||[],
+      week: getWeek(localMidnight), month: mo, year: yr,
+      // manager fields from sheet
+      status:r.status||'', assignedTo:r.assignedTo||'',
+      mgrComment:r.mgrComment||'', commentBy:r.commentBy||'',
+      commentTime:r.commentTime||'', ticketId:r.ticketId||'',
+      sheetName:r.sheetName||'', rowNum:r.rowNum||0,
+    };
+  });
+
+  TICKETS = (data.tickets||[]).map(t=>({
+    id:t.ticketId, created:t.created?getDateStr(t.created):'',
+    site:t.site, type:t.type, findings:t.findings, summary:t.summary,
+    status: LOCAL_STATUSES[t.ticketId] || t.status,
+    priority:t.priority,
+    responsible: LOCAL_ASSIGNED[t.ticketId] || t.responsible,
+    email:t.email, dueDate:t.dueDate?getDateStr(t.dueDate):'', link:t.link||'',
+    isOverdue: (LOCAL_STATUSES[t.ticketId]||t.status)!=='Done' && t.dueDate && getDateStr(t.dueDate)<getToday(),
+    mgrComment:t.mgrComment||'', commentBy:t.commentBy||'', remarks:t.remarks||'',
+  }));
 }
 
 // ================================================================
@@ -1143,6 +1369,7 @@ function switchSec(id,btn){
   if(id==='analytics') renderAnalytics();
   else if(id==='people') renderPeople();
   else if(id==='tickets') renderTickets();
+  else if(id==='settings'){ updateConnectionUI(); renderActivityLog(); }
   else renderSubmissions();
 }
 
@@ -1414,6 +1641,8 @@ async function saveSubComment(i, email, date, type, sheetName, rowNum){
     sheetName: sheetName||'', rowNum: rowNum||0
   });
 
+  logActivity('comment', `Comment on ${type} by ${email}`, text.slice(0,80));
+
   input.value = '';
   input.style.borderColor = '';
   btn.textContent = '💬 Save to Sheet'; btn.disabled = false;
@@ -1429,6 +1658,7 @@ async function updateSubStatus(email, date, type, status, selectEl){
   selectEl.style.borderColor = 'var(--yellow)';
   const key = email+'_'+date+'_'+type;
   await writeToSheet('updateStatus',{ rowId:key, sheetType:type, submitterEmail:email, date, status });
+  logActivity('status', `Changed status → ${status}`, `${type} by ${email} on ${date}`);
   selectEl.style.borderColor = 'var(--green)';
   setTimeout(()=>selectEl.style.borderColor='', 1500);
 }
@@ -1437,6 +1667,7 @@ async function assignSub(email, date, type, assignee, selectEl){
   selectEl.style.borderColor = 'var(--yellow)';
   const key = email+'_'+date+'_'+type;
   await writeToSheet('assignItem',{ rowId:key, sheetType:type, submitterEmail:email, date, assignee });
+  logActivity('assign', `Assigned to ${assignee}`, `${type} by ${email} on ${date}`);
   selectEl.style.borderColor = 'var(--green)';
   setTimeout(()=>selectEl.style.borderColor='', 1500);
 }
@@ -1837,6 +2068,7 @@ async function updateTicketStatus(id,status){
   LOCAL_STATUSES[id]=status;
   saveLocal();
   await writeToSheet('updateTicketStatus',{ticketId:id,status});
+  logActivity('ticket_status', `Ticket ${id} → ${status}`, '');
   renderTickets();
 }
 
@@ -1846,6 +2078,7 @@ async function assignTicket(id,assignee){
   LOCAL_ASSIGNED[id]=assignee;
   saveLocal();
   await writeToSheet('assignTicket',{ticketId:id,assignee});
+  logActivity('ticket_assign', `Ticket ${id} assigned to ${assignee}`, '');
 }
 
 async function markTicketDone(id){
@@ -2300,6 +2533,190 @@ document.querySelectorAll('.filter-bar .fpill').forEach(btn=>{
 });
 
 // ================================================================
+// PIN TABLE — set these for your team
+// Format: 'email': 'pin'
+// Team lead distributes PINs privately (WhatsApp, in person)
+// Change any PIN here and redeploy to GitHub to update
+// ================================================================
+const PIN_TABLE = {
+  'devang.bavalia@knuspr.de':               '1234',
+  'aruna.kamara@knuspr.de':                 '2345',
+  'sven.grutzner@gurkerl.at':               '3456',
+  'younes.elmalki@knuspr.de':               '4567',
+  'ravi.kumar@knuspr.de':                   '1111',
+  'florin.bordianu@knuspr.de':              '2222',
+  'glan.miranda@knuspr.de':                 '3333',
+  'sikandar.khan@knuspr.de':                '4444',
+  'tarun.gauniyal@knuspr.de':               '5555',
+  'keval.kakadiya@knuspr.de':               '6666',
+  'roshil.rose@knuspr.de':                  '7777',
+  'enosh.varghese@knuspr.de':               '8888',
+  'jordan.mcgregor@knuspr.de':              '9999',
+  'yogendra.rathore@knuspr.de':             '1212',
+  'omar.saber@gurkerl.at':                  '2323',
+  'ali.reza@gurkerl.at':                    '3434',
+  'seyedvahab.mirmostafavi@gurkerl.at':     '4545',
+  'mustafa.zainal@gurkerl.at':              '5656',
+  'danijel.karapandza@gurkerl.at':          '6767',
+  'jacek.rek@knuspr.de':                    '7878',
+  'edison.caushaj@knuspr.de':               '8989',
+  'amine.kabdani@knuspr.de':                '9090',
+  'shubham.ghogare@knuspr.de':              '1357',
+};
+
+// Max failed PIN attempts before lockout
+const MAX_PIN_ATTEMPTS = 5;
+let pinAttempts = 0;
+
+// ================================================================
+// IDENTITY GATE
+// ================================================================
+function checkIdentity(){
+  if(CURRENT_USER.name && CURRENT_USER.name !== 'Team Lead' && CURRENT_USER.email &&
+     CURRENT_USER.pinVerified) return;
+  const gate = document.getElementById('identityGate');
+  gate.style.display = 'flex';
+  setTimeout(()=>{ const s=document.getElementById('identitySelect'); if(s) s.focus(); },100);
+}
+
+function gateStep1Changed(){
+  // Clear PIN error when name changes
+  document.getElementById('pinError').textContent = '';
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinInput').style.borderColor = '';
+  setTimeout(()=> document.getElementById('pinInput').focus(), 50);
+}
+
+function confirmIdentity(){
+  const sel   = document.getElementById('identitySelect');
+  const pin   = document.getElementById('pinInput');
+  const err   = document.getElementById('pinError');
+
+  if(!sel.value){ sel.style.borderColor='var(--red)'; err.textContent='Please select your name.'; return; }
+
+  const [name, email] = sel.value.split('|');
+  const enteredPin    = pin.value.trim();
+  const correctPin    = PIN_TABLE[email.toLowerCase()];
+
+  if(!correctPin){
+    err.textContent = '⚠ No PIN configured for this account. Contact your team lead.';
+    return;
+  }
+
+  if(enteredPin !== correctPin){
+    pinAttempts++;
+    pin.value = '';
+    pin.style.borderColor = 'var(--red)';
+    setTimeout(()=>pin.style.borderColor='', 1500);
+
+    if(pinAttempts >= MAX_PIN_ATTEMPTS){
+      err.textContent = `🔒 Too many failed attempts. Reload the page to try again.`;
+      pin.disabled = true;
+      sel.disabled = true;
+      document.querySelector('#gateStep1 button').disabled = true;
+      return;
+    }
+    const left = MAX_PIN_ATTEMPTS - pinAttempts;
+    err.textContent = `❌ Incorrect PIN. ${left} attempt${left!==1?'s':''} remaining.`;
+    pin.focus();
+    return;
+  }
+
+  // ✅ PIN correct
+  err.textContent = '';
+  pinAttempts = 0;
+  CURRENT_USER = { name, email, pinVerified: true };
+  CFG.userName    = name;
+  CFG.userEmail   = email;
+  CFG.pinVerified = true;
+  localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
+  document.getElementById('identityGate').style.display = 'none';
+  updateConnectionUI();
+  logActivity('login', `Signed in to dashboard`, `${name} · ${email}`);
+}
+
+// ================================================================
+// ACTIVITY LOG — tracks every action locally + sends to Sheet
+// ================================================================
+const ACTIVITY_LOG_KEY = 'taskhub_activity';
+
+function logActivity(action, description, detail){
+  const entry = {
+    time:   new Date().toISOString(),
+    name:   CURRENT_USER.name  || 'Unknown',
+    email:  CURRENT_USER.email || '',
+    action,
+    description,
+    detail: detail || '',
+  };
+
+  // Save locally (last 200 entries)
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(ACTIVITY_LOG_KEY) || '[]'); } catch(e){}
+  log.unshift(entry);
+  if(log.length > 200) log = log.slice(0, 200);
+  localStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(log));
+
+  // Send to Google Sheets (non-blocking)
+  if(WRITE_URL){
+    fetch(WRITE_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'logActivity', ...entry })
+    }).catch(()=>{});
+  }
+
+  // Refresh log if Settings tab is open
+  if(document.getElementById('view-settings').classList.contains('on')){
+    renderActivityLog();
+  }
+}
+
+function renderActivityLog(){
+  const el = document.getElementById('activityLogList');
+  if(!el) return;
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(ACTIVITY_LOG_KEY)||'[]'); } catch(e){}
+
+  if(!log.length){
+    el.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No activity recorded yet</div>';
+    return;
+  }
+
+  const actionColors = {
+    login:'var(--accent)',comment:'var(--purple)',status:'var(--green)',
+    assign:'var(--teal)',ticket_status:'var(--orange)',ticket_assign:'var(--teal)',
+    ticket_comment:'var(--purple)',refresh:'var(--muted)',
+  };
+  const actionIcons = {
+    login:'🔑',comment:'💬',status:'🔄',assign:'👤',
+    ticket_status:'🎫',ticket_assign:'👤',ticket_comment:'💬',refresh:'🔄',
+  };
+
+  el.innerHTML = log.map((e,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:${i<log.length-1?'1px solid var(--border)':'none'}">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${actionIcons[e.action]||'▶'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:600">${e.name}</span>
+          <span style="font-size:11px;color:${actionColors[e.action]||'var(--muted)'};font-weight:600;background:var(--bg);padding:2px 7px;border-radius:4px">${e.action}</span>
+          <span style="font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-left:auto">${new Date(e.time).toLocaleString('en-GB',{timeZone:'Europe/Berlin',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text);margin-top:2px">${e.description}</div>
+        ${e.detail?`<div style="font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.detail}</div>`:''}
+        <div style="font-size:10px;color:var(--muted2);margin-top:1px">${e.email}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clearActivityLog(){
+  if(!confirm('Clear local activity log?')) return;
+  localStorage.removeItem(ACTIVITY_LOG_KEY);
+  renderActivityLog();
+}
+
+// ================================================================
 // INIT
 // ================================================================
 document.addEventListener('DOMContentLoaded',()=>{
@@ -2324,12 +2741,15 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Load data — live if connected, sample if not
   if(isConnected){
     updateConnectionUI();
-    refreshData(); // will start auto-refresh after load
+    refreshData();
   } else {
     loadSampleData();
     renderAll();
     updateConnectionUI();
   }
+
+  // Check identity AFTER data loads (slight delay so page is visible first)
+  setTimeout(checkIdentity, 300);
 });
 </script>
 </body>
