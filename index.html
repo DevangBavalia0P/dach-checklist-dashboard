@@ -283,6 +283,26 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:700px){main{padding:16px;}.kpi-row{grid-template-columns:1fr 1fr;}.person-grid{grid-template-columns:1fr;}.modal{width:98vw;max-height:95vh;}}
+
+/* ── ROLE-BASED ACCESS CONTROL ── */
+/* Guest: no action panels, no edit buttons, read-only badge on all cards */
+body.role-guest .action-panel,
+body.role-guest .btn-save,
+body.role-guest .action-select { display:none !important; }
+body.role-guest .sub-card::after {
+  content:'👁 View only'; position:absolute; bottom:10px; right:12px;
+  font-size:10px; color:var(--muted2); font-weight:600; pointer-events:none;
+}
+body.role-guest .sub-card { position:relative; }
+
+/* Technician: can see action panels but only for their own submissions */
+/* Manager action selects (status/assign) hidden for technicians */
+body.role-technician .action-select[id^="sel-status"],
+body.role-technician .action-select[id^="sel-assign"] { opacity:.4; pointer-events:none; cursor:not-allowed; }
+
+/* Guest: hide Settings connection fields */
+body.role-guest #sheetsUrlInput,
+body.role-guest #view-settings .btn-primary { display:none !important; }
 /* ── CONNECT MODAL ── */
 .connect-overlay{position:fixed;inset:0;background:rgba(15,18,40,.55);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 .connect-overlay.open{display:flex;}
@@ -294,7 +314,11 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
 .connect-field::placeholder{color:var(--muted2);}
 .connect-steps{background:var(--bg);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:20px;font-size:12px;line-height:2;color:var(--muted);}
 .connect-steps b{color:var(--text);font-weight:600;}
-/* ── AUTO-REFRESH ── */
+/* ── SETTINGS INPUTS ── */
+.settings-input{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:border-color .15s;cursor:pointer;}
+.settings-input:focus{border-color:var(--accent);background:var(--white);}
+.settings-input::placeholder{color:var(--muted2);}
+code{font-family:'JetBrains Mono',monospace;font-size:11px;}
 .refresh-chip{display:flex;align-items:center;gap:6px;background:var(--green-l);border:1px solid #bbf7d0;color:var(--green);padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;cursor:pointer;}
 .refresh-chip.paused{background:var(--bg);border-color:var(--border2);color:var(--muted);}
 .refresh-chip.syncing{background:#eff4ff;border-color:#bfdbfe;color:var(--accent);}
@@ -313,66 +337,97 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
 
 <!-- IDENTITY GATE — shown if no name set -->
 <div id="identityGate" style="display:none;position:fixed;inset:0;background:rgba(15,18,40,.75);z-index:3000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
-  <div style="background:var(--white);border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,.3);width:min(420px,92vw);padding:32px;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)">
+  <div style="background:var(--white);border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,.3);width:min(460px,92vw);padding:32px;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)">
 
-    <!-- STEP 1: Choose name -->
-    <div id="gateStep1">
-      <div style="text-align:center;margin-bottom:24px">
-        <div style="font-size:36px;margin-bottom:10px">🔐</div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:6px">Sign in to Task Hub</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.6">Select your name then enter your personal PIN to continue.</div>
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:36px;margin-bottom:10px">🔐</div>
+      <div style="font-size:20px;font-weight:700;margin-bottom:6px">DACH Task Hub</div>
+      <div style="font-size:13px;color:var(--muted)">Choose how you want to access the hub</div>
+    </div>
+
+    <!-- ROLE PICKER -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px">
+      <div onclick="selectRole('guest')" id="roleGuest" style="border:2px solid var(--border);border-radius:var(--r-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s">
+        <div style="font-size:22px;margin-bottom:6px">👁</div>
+        <div style="font-size:12px;font-weight:700">Guest</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">View only</div>
       </div>
+      <div onclick="selectRole('technician')" id="roleTechnician" style="border:2px solid var(--border);border-radius:var(--r-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s">
+        <div style="font-size:22px;margin-bottom:6px">👷</div>
+        <div style="font-size:12px;font-weight:700">Technician</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">PIN required</div>
+      </div>
+      <div onclick="selectRole('manager')" id="roleManager" style="border:2px solid var(--border);border-radius:var(--r-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s">
+        <div style="font-size:22px;margin-bottom:6px">🏆</div>
+        <div style="font-size:12px;font-weight:700">Manager</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Full access</div>
+      </div>
+    </div>
+
+    <!-- GUEST: just enter -->
+    <div id="gateGuest" style="display:none">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.7">
+        👁 <strong style="color:var(--text)">Guest mode</strong> — you can view all submissions, charts and tickets in read-only mode. You cannot add comments, change status or assign tasks.
+      </div>
+      <button onclick="enterAsGuest()" style="width:100%;background:var(--bg);color:var(--text);border:1.5px solid var(--border2);padding:11px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'">
+        Enter as Guest →
+      </button>
+    </div>
+
+    <!-- TECHNICIAN / MANAGER: name + PIN -->
+    <div id="gatePinForm" style="display:none">
       <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name</label>
-      <select id="identitySelect" onchange="gateStep1Changed()" style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;outline:none;margin-bottom:16px;cursor:pointer">
+      <select id="identitySelect" onchange="gateStep1Changed()" style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;outline:none;margin-bottom:14px;cursor:pointer">
         <option value="">— Choose your name —</option>
-        <optgroup label="Team Leads">
-          <option value="Devang Bavalia|devang.bavalia@knuspr.de">Devang Bavalia (BER Lead)</option>
-          <option value="Aruna Kamara|aruna.kamara@knuspr.de">Aruna Kamara (MUC Lead)</option>
-          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at">Sven GRÜTZNER (VIE Lead)</option>
-          <option value="Younes El Malki|younes.elmalki@knuspr.de">Younes El Malki (FRA Lead)</option>
+        <optgroup label="Managers" id="managerOptions">
+          <option value="Devang Bavalia|devang.bavalia@knuspr.de|manager">Devang Bavalia (BER Manager)</option>
+          <option value="Aruna Kamara|aruna.kamara@knuspr.de|manager">Aruna Kamara (MUC Manager)</option>
+          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at|manager">Sven GRÜTZNER (VIE Manager)</option>
+          <option value="Younes El Malki|younes.elmalki@knuspr.de|manager">Younes El Malki (FRA Manager)</option>
         </optgroup>
-        <optgroup label="BER Technicians">
-          <option value="Ravi Kumar|ravi.kumar@knuspr.de">Ravi Kumar</option>
-          <option value="Florin Adrian Bordianu|florin.bordianu@knuspr.de">Florin Adrian Bordianu</option>
-          <option value="Glan Miranda|glan.miranda@knuspr.de">Glan Miranda</option>
-          <option value="Sikandar Khan|sikandar.khan@knuspr.de">Sikandar Khan</option>
+        <optgroup label="BER Technicians" id="techOptions">
+          <option value="Ravi Kumar|ravi.kumar@knuspr.de|technician">Ravi Kumar</option>
+          <option value="Florin Adrian Bordianu|florin.bordianu@knuspr.de|technician">Florin Adrian Bordianu</option>
+          <option value="Glan Miranda|glan.miranda@knuspr.de|technician">Glan Miranda</option>
+          <option value="Sikandar Khan|sikandar.khan@knuspr.de|technician">Sikandar Khan</option>
         </optgroup>
         <optgroup label="MUC Technicians">
-          <option value="Tarun Gauniyal|tarun.gauniyal@knuspr.de">Tarun Gauniyal</option>
-          <option value="Keval Kakadiya|keval.kakadiya@knuspr.de">Keval Kakadiya</option>
-          <option value="Roshil Rose|roshil.rose@knuspr.de">Roshil Rose</option>
-          <option value="Enosh Varghese|enosh.varghese@knuspr.de">Enosh Varghese</option>
-          <option value="Jordan McGregor|jordan.mcgregor@knuspr.de">Jordan McGregor</option>
-          <option value="Yogendra Rathore|yogendra.rathore@knuspr.de">Yogendra Rathore</option>
+          <option value="Tarun Gauniyal|tarun.gauniyal@knuspr.de|technician">Tarun Gauniyal</option>
+          <option value="Keval Kakadiya|keval.kakadiya@knuspr.de|technician">Keval Kakadiya</option>
+          <option value="Roshil Rose|roshil.rose@knuspr.de|technician">Roshil Rose</option>
+          <option value="Enosh Varghese|enosh.varghese@knuspr.de|technician">Enosh Varghese</option>
+          <option value="Jordan McGregor|jordan.mcgregor@knuspr.de|technician">Jordan McGregor</option>
+          <option value="Yogendra Rathore|yogendra.rathore@knuspr.de|technician">Yogendra Rathore</option>
         </optgroup>
         <optgroup label="VIE Technicians">
-          <option value="Omar SABER|omar.saber@gurkerl.at">Omar SABER</option>
-          <option value="Ali JAFARI|ali.reza@gurkerl.at">Ali JAFARI</option>
-          <option value="Seyedvahab MIRMOSTAFAVI|seyedvahab.mirmostafavi@gurkerl.at">Seyedvahab MIRMOSTAFAVI</option>
-          <option value="Mustafa ZAINAL|mustafa.zainal@gurkerl.at">Mustafa ZAINAL</option>
-          <option value="Danijel KARAPANDZA|danijel.karapandza@gurkerl.at">Danijel KARAPANDZA</option>
+          <option value="Omar SABER|omar.saber@gurkerl.at|technician">Omar SABER</option>
+          <option value="Ali JAFARI|ali.reza@gurkerl.at|technician">Ali JAFARI</option>
+          <option value="Seyedvahab MIRMOSTAFAVI|seyedvahab.mirmostafavi@gurkerl.at|technician">Seyedvahab MIRMOSTAFAVI</option>
+          <option value="Mustafa ZAINAL|mustafa.zainal@gurkerl.at|technician">Mustafa ZAINAL</option>
+          <option value="Danijel KARAPANDZA|danijel.karapandza@gurkerl.at|technician">Danijel KARAPANDZA</option>
         </optgroup>
         <optgroup label="FRA Technicians">
-          <option value="Jacek Rek|jacek.rek@knuspr.de">Jacek Rek</option>
-          <option value="Edison|edison.caushaj@knuspr.de">Edison</option>
-          <option value="Amine Kabdani|amine.kabdani@knuspr.de">Amine Kabdani</option>
-          <option value="Shubham Rajaram Ghogare|shubham.ghogare@knuspr.de">Shubham Rajaram Ghogare</option>
+          <option value="Jacek Rek|jacek.rek@knuspr.de|technician">Jacek Rek</option>
+          <option value="Edison|edison.caushaj@knuspr.de|technician">Edison</option>
+          <option value="Amine Kabdani|amine.kabdani@knuspr.de|technician">Amine Kabdani</option>
+          <option value="Shubham Rajaram Ghogare|shubham.ghogare@knuspr.de|technician">Shubham Rajaram Ghogare</option>
         </optgroup>
       </select>
 
-      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your PIN</label>
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">PIN</label>
       <input id="pinInput" type="password" inputmode="numeric" maxlength="6"
-        placeholder="Enter your PIN"
-        onkeydown="if(event.key==='Enter')confirmIdentity()"
-        style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:8px;outline:none;margin-bottom:6px;text-align:center;transition:border-color .15s">
+        placeholder="• • • •" onkeydown="if(event.key==='Enter')confirmIdentity()"
+        style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:10px;outline:none;margin-bottom:6px;text-align:center;transition:border-color .15s">
       <div id="pinError" style="color:var(--red);font-size:12px;font-weight:600;min-height:18px;margin-bottom:12px;text-align:center"></div>
 
       <button onclick="confirmIdentity()" style="width:100%;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='var(--accent)'">
-        Enter Dashboard →
+        Sign In →
       </button>
-      <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--muted)">PIN is set by your team lead · Saved in this browser after first login</div>
     </div>
 
+    <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted)">
+      Remembered on this device after first login · <a href="#" onclick="forgetMe();return false" style="color:var(--accent)">Sign out</a>
+    </div>
   </div>
 </div>
 
@@ -620,70 +675,51 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
 
 <!-- ======= SETTINGS ======= -->
 <div class="view" id="view-settings">
-  <div style="max-width:680px;margin:0 auto">
+  <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
 
-    <!-- CONNECTION STATUS CARD -->
-    <div class="card" style="margin-bottom:20px;overflow:visible">
+    <!-- CONNECTION CARD -->
+    <div class="card">
       <div class="card-hd">
         <div class="card-title">🔗 Google Sheets Connection</div>
         <div id="settingsStatusBadge" class="sbadge s-not">Not connected</div>
       </div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
-
         <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">
-            Apps Script URL
-            <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted2);margin-left:6px">— same URL is used for reading data and saving changes</span>
-          </label>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Apps Script URL <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted2)">— same URL for reading and writing</span></label>
           <div style="display:flex;gap:8px">
-            <input id="sheetsUrlInput" type="url" style="flex:1;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .15s"
-              placeholder="https://script.google.com/macros/s/AKfycb…/exec"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
-            <button class="btn btn-primary" onclick="saveConnection()" style="white-space:nowrap;padding:10px 18px">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Save & Connect
-            </button>
+            <input id="sheetsUrlInput" type="url" class="settings-input" placeholder="https://script.google.com/macros/s/AKfycb…/exec" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
+            <button class="btn btn-primary" onclick="saveConnection()" style="white-space:nowrap;padding:10px 18px">✓ Save & Connect</button>
           </div>
           <div id="connectStatus" style="margin-top:8px;font-size:12px;display:none"></div>
         </div>
-
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div>
-            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name (shown in comments)</label>
-            <input id="userNameInput" type="text" style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:border-color .15s"
-              placeholder="e.g. Devang Bavalia"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name</label>
+            <input id="userNameInput" type="text" class="settings-input" placeholder="e.g. Devang Bavalia" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
           </div>
           <div>
             <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Email</label>
-            <input id="userEmailInput" type="email" style="width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;outline:none;transition:border-color .15s"
-              placeholder="e.g. devang.bavalia@knuspr.de"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
+            <input id="userEmailInput" type="email" class="settings-input" placeholder="e.g. devang.bavalia@knuspr.de" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
           </div>
         </div>
-
-        <div style="display:flex;gap:8px;padding-top:4px">
-          <button class="btn btn-ghost btn-sm" onclick="clearConnection()" style="color:var(--red);border-color:var(--red)">Disconnect</button>
-          <a id="settingsSheetLink" href="https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac" target="_blank" class="btn btn-ghost btn-sm">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#34a853"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-            Open Google Sheet
-          </a>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="clearConnection()" style="color:var(--red);border-color:#fca5a5">Disconnect</button>
+          <a id="settingsSheetLink" href="https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac" target="_blank" class="btn btn-ghost btn-sm">📊 Open Google Sheet</a>
+          <a href="https://dach-checklist-dashboard-knuspr.netlify.app/taskhub.html" target="_blank" class="btn btn-ghost btn-sm">🔗 Copy Hub Link</a>
         </div>
-
       </div>
     </div>
 
-    <!-- AUTO REFRESH CARD -->
-    <div class="card" style="margin-bottom:20px">
+    <!-- AUTO-REFRESH CARD -->
+    <div class="card">
       <div class="card-hd"><div class="card-title">🔄 Auto-Refresh</div></div>
       <div class="card-body">
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-          <div style="flex:1;min-width:200px">
-            <div style="font-size:13px;font-weight:500;margin-bottom:4px">Refresh interval</div>
-            <div style="font-size:12px;color:var(--muted)">How often the dashboard automatically syncs from Google Sheets</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;margin-bottom:3px">Sync interval</div>
+            <div style="font-size:12px;color:var(--muted)">How often the dashboard pulls fresh data from Google Sheets</div>
           </div>
-          <select onchange="changeIntervalFromSettings(this.value)" id="refreshIntervalSettings"
-            style="background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:9px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;font-weight:500;cursor:pointer;outline:none">
+          <select id="refreshIntervalSettings" onchange="changeIntervalFromSettings(this.value)" class="settings-input" style="width:auto;padding:9px 14px">
             <option value="0">Off — manual only</option>
             <option value="60">Every 1 minute</option>
             <option value="120">Every 2 minutes</option>
@@ -699,57 +735,79 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
       </div>
     </div>
 
-    <!-- HOW TO SETUP CARD -->
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-hd"><div class="card-title">📋 Apps Script Setup Guide</div></div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
-        ${[
-          ['1','Open your Google Sheet','Extensions → Apps Script'],
-          ['2','Delete all existing code','Select All (Ctrl+A) → Delete'],
-          ['3','Paste the complete script','Use the DACH_AppScript_Complete.js file'],
-          ['4','Save the script','Click the 💾 Save button'],
-          ['5','Deploy as Web App','Deploy → New deployment → Web app'],
-          ['6','Set access to Anyone','Execute as: Me → Who has access: Anyone'],
-          ['7','Deploy and copy URL','Click Deploy → copy the /exec URL'],
-          ['8','Paste URL above','Enter your name and email → Save & Connect'],
-        ].map(([n,title,sub])=>`
-          <div style="display:flex;gap:12px;align-items:flex-start">
-            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${n}</div>
-            <div>
-              <div style="font-size:13px;font-weight:600">${title}</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:1px">${sub}</div>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- ABOUT CARD -->
-    <div class="card" style="margin-bottom:20px">
-      <div class="card-hd"><div class="card-title">ℹ️ About</div></div>
-      <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${[
-          ['Dashboard','DACH Facility Operations Task Hub'],
-          ['Sites','BER · MUC · VIE · FRA'],
-          ['Technicians','19 across all sites'],
-          ['Data source','Google Sheets (via Apps Script)'],
-          ['Write-back','Status, comments, assignments → Sheet'],
-          ['Notifications','Email on @mention'],
-        ].map(([k,v])=>`
-          <div style="background:var(--bg);border-radius:var(--r-sm);padding:10px 14px">
-            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px">${k}</div>
-            <div style="font-size:13px;font-weight:500">${v}</div>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- ACTIVITY LOG CARD -->
+    <!-- PEOPLE MANAGER -->
     <div class="card">
       <div class="card-hd">
-        <div class="card-title">🕵️ Activity Log — Who Changed What</div>
-        <button class="btn btn-ghost btn-sm" onclick="clearActivityLog()">Clear log</button>
+        <div class="card-title">👥 People & Access</div>
       </div>
       <div class="card-body" style="padding:0">
-        <div id="activityLogList" style="max-height:400px;overflow-y:auto"></div>
+        <div style="overflow-x:auto">
+          <table class="dtable" id="peopleTable">
+            <thead><tr>
+              <th>Name</th><th>Email</th><th>Role</th><th>Site</th><th>PIN</th>
+            </tr></thead>
+            <tbody id="peopleTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEVELOPER CARD -->
+    <div class="card">
+      <div class="card-hd"><div class="card-title">ℹ️ About this Dashboard</div></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Developer info -->
+        <div style="display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border)">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0">OP</div>
+          <div>
+            <div style="font-size:15px;font-weight:700">Devang Bavalia</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Developer & Creator · DACH Facility Operations Hub</div>
+            <a href="mailto:devang.bavalia@knuspr.de" style="font-size:12px;color:var(--accent);text-decoration:none;margin-top:4px;display:inline-flex;align-items:center;gap:4px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+              devang.bavalia@knuspr.de
+            </a>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--muted);background:var(--bg);border-radius:var(--r-sm);padding:12px 14px;border:1px solid var(--border)">
+          For any issues, feature requests or access problems — reach out directly via email above.
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px 14px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Hub URL</div>
+            <div style="font-size:11px;font-weight:500;font-family:'JetBrains Mono',monospace;word-break:break-all;color:var(--accent)">
+              <a href="https://dach-checklist-dashboard-knuspr.netlify.app/taskhub.html" target="_blank" style="color:var(--accent);text-decoration:none">
+                dach-checklist-dashboard-knuspr.netlify.app/taskhub.html
+              </a>
+            </div>
+          </div>
+          <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px 14px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Data Source</div>
+            <div style="font-size:13px;font-weight:500">Google Sheets · Apps Script</div>
+          </div>
+          <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px 14px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Sites</div>
+            <div style="font-size:13px;font-weight:500">BER · MUC · VIE · FRA</div>
+          </div>
+          <div style="background:var(--bg);border-radius:var(--r-sm);padding:12px 14px">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Notifications</div>
+            <div style="font-size:13px;font-weight:500">Email on @mention</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">🕵️ Activity Log</div>
+        <span id="activityCount" style="font-size:11px;color:var(--muted)"></span>
+      </div>
+      <div style="max-height:400px;overflow-y:auto;border-radius:0 0 var(--r) var(--r)" id="activityLogList">
+        <div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">No activity yet — actions will appear here as you use the hub</div>
       </div>
     </div>
 
@@ -768,13 +826,14 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
 let CFG = JSON.parse(localStorage.getItem('taskhub_cfg') || '{}');
 
 // Derive live values (fallback to hardcoded if set in code)
-let SHEETS_URL = CFG.sheetsUrl || "";
-let WRITE_URL  = CFG.sheetsUrl || ""; // same URL for GET+POST
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxbrYqC0x7eT9D6RRbmHBqY9MiE65ChrINVvY9CKho2TOwitnoeYWH430QymxHD4nHaBw/exec";
+let SHEETS_URL = CFG.sheetsUrl || "https://script.google.com/macros/s/AKfycbxbrYqC0x7eT9D6RRbmHBqY9MiE65ChrINVvY9CKho2TOwitnoeYWH430QymxHD4nHaBw/exec";
+let WRITE_URL  = CFG.sheetsUrl || "https://script.google.com/macros/s/AKfycbxbrYqC0x7eT9D6RRbmHBqY9MiE65ChrINVvY9CKho2TOwitnoeYWH430QymxHD4nHaBw/exec"; // same URL for GET+POST
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac";
 
 let CURRENT_USER = {
-  name:        CFG.userName    || 'Team Lead',
+  name:        CFG.userName    || '',
   email:       CFG.userEmail   || '',
+  role:        CFG.role        || '',      // 'guest' | 'technician' | 'manager'
   pinVerified: CFG.pinVerified || false,
 };
 
@@ -1369,7 +1428,7 @@ function switchSec(id,btn){
   if(id==='analytics') renderAnalytics();
   else if(id==='people') renderPeople();
   else if(id==='tickets') renderTickets();
-  else if(id==='settings'){ updateConnectionUI(); renderActivityLog(); }
+  else if(id==='settings'){ updateConnectionUI(); renderActivityLog(); renderPeopleTable(); }
   else renderSubmissions();
 }
 
@@ -1538,12 +1597,25 @@ function renderSubmissions(){
               <!-- Images -->
               ${s.imgs&&s.imgs.length?`
               <div>
-                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📸 Photos / Videos</div>
+                <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📸 Photos / Videos (${s.imgs.length})</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  ${s.imgs.map((url,pi)=>`
-                    <a href="${url}" target="_blank" style="display:flex;align-items:center;justify-content:center;width:72px;height:56px;border-radius:6px;background:var(--bg);border:1px solid var(--border);text-decoration:none;font-size:22px;cursor:pointer;transition:transform .15s" title="Open image ${pi+1}" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                      📷
-                    </a>`).join('')}
+                  ${s.imgs.map((url,pi)=>{
+                    // Convert Google Drive share link to direct image URL for preview
+                    let previewUrl = url;
+                    const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                    if(driveMatch) previewUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w200`;
+                    return `<div style="position:relative">
+                      <img src="${previewUrl}" alt="Photo ${pi+1}"
+                        style="width:90px;height:70px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:transform .15s"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                        onclick="window.open('${url}','_blank')"
+                        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                      <a href="${url}" target="_blank"
+                        style="display:none;width:90px;height:70px;border-radius:8px;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;flex-direction:column;text-decoration:none;cursor:pointer;gap:4px;font-size:10px;color:var(--muted);font-weight:600">
+                        <span style="font-size:22px">📷</span>Open ${pi+1}
+                      </a>
+                    </div>`;
+                  }).join('')}
                 </div>
               </div>`:''}
 
@@ -1986,6 +2058,25 @@ function openTicketModal(id){
   const sbg=STATUS_BG[t.status]||'#f5f6fa';
   const mgr=LOCAL_COMMENTS['ticket_'+id]||[];
   const daysSince=Math.floor((new Date()-new Date(t.created))/(1000*60*60*24));
+
+  // Find source submission images by matching ticketId
+  const srcSub = SUBS.find(s=>s.ticketId===id);
+  const srcImgs = srcSub ? (srcSub.imgs||[]) : [];
+  function imgThumb(url,i){
+    const m=url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const prev=m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w200`:url;
+    return `<div style="display:inline-block">
+      <img src="${prev}" alt="Photo ${i+1}"
+        style="width:88px;height:68px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:transform .15s"
+        onerror="this.style.display='none';this.nextSibling.style.display='flex'"
+        onclick="window.open('${url}','_blank')"
+        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <a href="${url}" target="_blank"
+        style="display:none;width:88px;height:68px;border-radius:8px;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;flex-direction:column;text-decoration:none;cursor:pointer;gap:3px;font-size:10px;color:var(--accent);font-weight:600">
+        <span style="font-size:20px">📷</span>Open ↗</a>
+    </div>`;
+  }
+
   openModal(`🎫 ${t.id}`,`${t.site} · ${t.type} · Created ${t.created}`,`
     <div class="modal-kpis">
       <div class="mkpi">
@@ -2019,6 +2110,12 @@ function openTicketModal(id){
       <div class="sec-lbl">Findings</div>
       <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid ${sc};border-radius:0 var(--r-sm) var(--r-sm) 0;padding:12px 16px;font-size:13px;white-space:pre-line">${t.findings||'—'}</div>
     </div>
+
+    ${srcImgs.length?`
+    <div style="margin-bottom:16px">
+      <div class="sec-lbl">📸 Photos from Source Submission (${srcImgs.length})</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${srcImgs.map((u,i)=>imgThumb(u,i)).join('')}</div>
+    </div>`:''}
 
     <!-- Manager Actions -->
     <div class="action-panel">
@@ -2057,7 +2154,7 @@ function openTicketModal(id){
     </div>`:`
     <div style="margin-top:16px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);display:flex;align-items:center;gap:10px">
       <span style="font-size:20px">📋</span>
-      <div style="font-size:12px;color:var(--muted)">No direct response link available — <a href="${SHEET_URL}" target="_blank" style="color:var(--accent)">open Google Sheet</a> to find the source row manually.</div>
+      <div style="font-size:12px;color:var(--muted)">No direct link — <a href="${SHEET_URL}" target="_blank" style="color:var(--accent)">open Google Sheet</a> to find the source row.</div>
     </div>`}
   `);
 }
@@ -2533,111 +2630,211 @@ document.querySelectorAll('.filter-bar .fpill').forEach(btn=>{
 });
 
 // ================================================================
-// PIN TABLE — set these for your team
-// Format: 'email': 'pin'
-// Team lead distributes PINs privately (WhatsApp, in person)
-// Change any PIN here and redeploy to GitHub to update
+// ROLE SYSTEM
+// 3 roles: guest (read-only), technician (PIN, limited), manager (PIN, full)
+//
+// ⚠ CHANGE THESE PINS before going live!
+// Distribute each PIN privately — WhatsApp/in person only.
 // ================================================================
-const PIN_TABLE = {
-  'devang.bavalia@knuspr.de':               '1234',
-  'aruna.kamara@knuspr.de':                 '2345',
-  'sven.grutzner@gurkerl.at':               '3456',
-  'younes.elmalki@knuspr.de':               '4567',
-  'ravi.kumar@knuspr.de':                   '1111',
-  'florin.bordianu@knuspr.de':              '2222',
-  'glan.miranda@knuspr.de':                 '3333',
-  'sikandar.khan@knuspr.de':                '4444',
-  'tarun.gauniyal@knuspr.de':               '5555',
-  'keval.kakadiya@knuspr.de':               '6666',
-  'roshil.rose@knuspr.de':                  '7777',
-  'enosh.varghese@knuspr.de':               '8888',
-  'jordan.mcgregor@knuspr.de':              '9999',
-  'yogendra.rathore@knuspr.de':             '1212',
-  'omar.saber@gurkerl.at':                  '2323',
-  'ali.reza@gurkerl.at':                    '3434',
-  'seyedvahab.mirmostafavi@gurkerl.at':     '4545',
-  'mustafa.zainal@gurkerl.at':              '5656',
-  'danijel.karapandza@gurkerl.at':          '6767',
-  'jacek.rek@knuspr.de':                    '7878',
-  'edison.caushaj@knuspr.de':               '8989',
-  'amine.kabdani@knuspr.de':                '9090',
-  'shubham.ghogare@knuspr.de':              '1357',
+const ROLES = {
+  // Managers — full access: view + comment + status + assign + tickets
+  'devang.bavalia@knuspr.de':           { pin:'1234', role:'manager', name:'Devang Bavalia'         },
+  'aruna.kamara@knuspr.de':             { pin:'2345', role:'manager', name:'Aruna Kamara'            },
+  'sven.grutzner@gurkerl.at':           { pin:'3456', role:'manager', name:'Sven GRÜTZNER'           },
+  'younes.elmalki@knuspr.de':           { pin:'4567', role:'manager', name:'Younes El Malki'         },
+
+  // Technicians — can view all + comment on own submissions only
+  'ravi.kumar@knuspr.de':               { pin:'1111', role:'technician', name:'Ravi Kumar'           },
+  'florin.bordianu@knuspr.de':          { pin:'2222', role:'technician', name:'Florin Adrian Bordianu'},
+  'glan.miranda@knuspr.de':             { pin:'3333', role:'technician', name:'Glan Miranda'          },
+  'sikandar.khan@knuspr.de':            { pin:'4444', role:'technician', name:'Sikandar Khan'         },
+  'tarun.gauniyal@knuspr.de':           { pin:'5555', role:'technician', name:'Tarun Gauniyal'        },
+  'keval.kakadiya@knuspr.de':           { pin:'6666', role:'technician', name:'Keval Kakadiya'        },
+  'roshil.rose@knuspr.de':              { pin:'7777', role:'technician', name:'Roshil Rose'           },
+  'enosh.varghese@knuspr.de':           { pin:'8888', role:'technician', name:'Enosh Varghese'        },
+  'jordan.mcgregor@knuspr.de':          { pin:'9999', role:'technician', name:'Jordan McGregor'       },
+  'yogendra.rathore@knuspr.de':         { pin:'1212', role:'technician', name:'Yogendra Rathore'      },
+  'omar.saber@gurkerl.at':              { pin:'2323', role:'technician', name:'Omar SABER'            },
+  'ali.reza@gurkerl.at':                { pin:'3434', role:'technician', name:'Ali JAFARI'            },
+  'seyedvahab.mirmostafavi@gurkerl.at': { pin:'4545', role:'technician', name:'Seyedvahab MIRMOSTAFAVI'},
+  'mustafa.zainal@gurkerl.at':          { pin:'5656', role:'technician', name:'Mustafa ZAINAL'        },
+  'danijel.karapandza@gurkerl.at':      { pin:'6767', role:'technician', name:'Danijel KARAPANDZA'    },
+  'jacek.rek@knuspr.de':                { pin:'7878', role:'technician', name:'Jacek Rek'             },
+  'edison.caushaj@knuspr.de':           { pin:'8989', role:'technician', name:'Edison'                },
+  'amine.kabdani@knuspr.de':            { pin:'9090', role:'technician', name:'Amine Kabdani'         },
+  'shubham.ghogare@knuspr.de':          { pin:'1357', role:'technician', name:'Shubham Rajaram Ghogare'},
 };
 
-// Max failed PIN attempts before lockout
+// ── Role capability checks ────────────────────────────────────────
+function canEdit()       { return CURRENT_USER.role === 'manager' || CURRENT_USER.role === 'technician'; }
+function isManager()     { return CURRENT_USER.role === 'manager'; }
+function isGuest()       { return CURRENT_USER.role === 'guest'; }
+
 const MAX_PIN_ATTEMPTS = 5;
 let pinAttempts = 0;
+let selectedGateRole = ''; // which role card was clicked
 
 // ================================================================
 // IDENTITY GATE
 // ================================================================
 function checkIdentity(){
-  if(CURRENT_USER.name && CURRENT_USER.name !== 'Team Lead' && CURRENT_USER.email &&
-     CURRENT_USER.pinVerified) return;
-  const gate = document.getElementById('identityGate');
-  gate.style.display = 'flex';
-  setTimeout(()=>{ const s=document.getElementById('identitySelect'); if(s) s.focus(); },100);
+  if(CURRENT_USER.role && CURRENT_USER.pinVerified) return;
+  if(CURRENT_USER.role === 'guest') return;
+  document.getElementById('identityGate').style.display = 'flex';
+}
+
+function selectRole(role){
+  selectedGateRole = role;
+  // Highlight selected card
+  ['guest','technician','manager'].forEach(r=>{
+    const el = document.getElementById('role'+r.charAt(0).toUpperCase()+r.slice(1));
+    if(el) el.style.borderColor = r===role ? 'var(--accent)' : 'var(--border)';
+  });
+  // Show relevant section
+  document.getElementById('gateGuest').style.display   = role==='guest'      ? 'block' : 'none';
+  document.getElementById('gatePinForm').style.display  = role!=='guest'      ? 'block' : 'none';
+
+  // Filter dropdown to match selected role
+  const sel = document.getElementById('identitySelect');
+  if(sel){
+    Array.from(sel.options).forEach(opt=>{
+      if(!opt.value) return; // keep placeholder
+      const parts = opt.value.split('|');
+      const optRole = parts[2]||'technician';
+      opt.hidden = (role === 'manager' && optRole !== 'manager') ||
+                   (role === 'technician' && optRole !== 'technician');
+    });
+    sel.value = '';
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinError').textContent = '';
+    setTimeout(()=>sel.focus(), 50);
+  }
 }
 
 function gateStep1Changed(){
-  // Clear PIN error when name changes
   document.getElementById('pinError').textContent = '';
   document.getElementById('pinInput').value = '';
-  document.getElementById('pinInput').style.borderColor = '';
-  setTimeout(()=> document.getElementById('pinInput').focus(), 50);
+  setTimeout(()=>document.getElementById('pinInput').focus(), 50);
+}
+
+function enterAsGuest(){
+  CURRENT_USER = { name:'Guest', email:'', role:'guest', pinVerified:true };
+  CFG.role = 'guest'; CFG.pinVerified = true; CFG.userName = 'Guest'; CFG.userEmail = '';
+  localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
+  document.getElementById('identityGate').style.display = 'none';
+  applyRoleUI();
+  logActivity('login', 'Guest viewed dashboard', '');
 }
 
 function confirmIdentity(){
-  const sel   = document.getElementById('identitySelect');
-  const pin   = document.getElementById('pinInput');
-  const err   = document.getElementById('pinError');
+  const sel = document.getElementById('identitySelect');
+  const pin = document.getElementById('pinInput');
+  const err = document.getElementById('pinError');
 
   if(!sel.value){ sel.style.borderColor='var(--red)'; err.textContent='Please select your name.'; return; }
 
-  const [name, email] = sel.value.split('|');
-  const enteredPin    = pin.value.trim();
-  const correctPin    = PIN_TABLE[email.toLowerCase()];
+  const parts       = sel.value.split('|');
+  const name        = parts[0], email = parts[1];
+  const enteredPin  = pin.value.trim();
+  const record      = ROLES[email.toLowerCase()];
 
-  if(!correctPin){
-    err.textContent = '⚠ No PIN configured for this account. Contact your team lead.';
-    return;
-  }
+  if(!record){ err.textContent='⚠ No PIN configured. Contact your manager.'; return; }
+  if(record.role !== selectedGateRole){ err.textContent='⚠ Wrong login type selected for this account.'; return; }
 
-  if(enteredPin !== correctPin){
+  if(enteredPin !== record.pin){
     pinAttempts++;
     pin.value = '';
     pin.style.borderColor = 'var(--red)';
     setTimeout(()=>pin.style.borderColor='', 1500);
-
     if(pinAttempts >= MAX_PIN_ATTEMPTS){
-      err.textContent = `🔒 Too many failed attempts. Reload the page to try again.`;
-      pin.disabled = true;
-      sel.disabled = true;
-      document.querySelector('#gateStep1 button').disabled = true;
+      err.textContent = '🔒 Too many failed attempts. Reload the page to try again.';
+      pin.disabled = true; sel.disabled = true;
+      document.querySelector('#gatePinForm button').disabled = true;
       return;
     }
     const left = MAX_PIN_ATTEMPTS - pinAttempts;
-    err.textContent = `❌ Incorrect PIN. ${left} attempt${left!==1?'s':''} remaining.`;
-    pin.focus();
-    return;
+    err.textContent = `❌ Wrong PIN. ${left} attempt${left!==1?'s':''} left.`;
+    pin.focus(); return;
   }
 
-  // ✅ PIN correct
-  err.textContent = '';
+  // ✅ Correct PIN
   pinAttempts = 0;
-  CURRENT_USER = { name, email, pinVerified: true };
-  CFG.userName    = name;
-  CFG.userEmail   = email;
-  CFG.pinVerified = true;
+  CURRENT_USER = { name, email, role: record.role, pinVerified: true };
+  CFG = { ...CFG, userName: name, userEmail: email, role: record.role, pinVerified: true };
   localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
   document.getElementById('identityGate').style.display = 'none';
+  applyRoleUI();
   updateConnectionUI();
-  logActivity('login', `Signed in to dashboard`, `${name} · ${email}`);
+  logActivity('login', `Signed in as ${record.role}`, `${name} · ${email}`);
+}
+
+function forgetMe(){
+  if(!confirm('Sign out of this device?')) return;
+  delete CFG.userName; delete CFG.userEmail; delete CFG.role; delete CFG.pinVerified;
+  localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
+  CURRENT_USER = { name:'', email:'', role:'', pinVerified:false };
+  document.getElementById('identityGate').style.display = 'flex';
+  // Reset gate
+  ['guest','technician','manager'].forEach(r=>{
+    const el = document.getElementById('role'+r.charAt(0).toUpperCase()+r.slice(1));
+    if(el) el.style.borderColor = 'var(--border)';
+  });
+  document.getElementById('gateGuest').style.display  = 'none';
+  document.getElementById('gatePinForm').style.display = 'none';
+}
+
+// ── Apply role-based UI restrictions ─────────────────────────────
+function applyRoleUI(){
+  const role = CURRENT_USER.role || 'guest';
+
+  // Header role badge
+  const existing = document.getElementById('roleBadge');
+  if(existing) existing.remove();
+  const badge = document.createElement('div');
+  badge.id = 'roleBadge';
+  const roleConfig = {
+    guest:      { label:'👁 Guest',      bg:'var(--bg)',        color:'var(--muted)',  border:'var(--border2)' },
+    technician: { label:'👷 Technician', bg:'var(--teal-l)',    color:'var(--teal)',   border:'#99f6e4'        },
+    manager:    { label:'🏆 Manager',    bg:'var(--purple-l)',  color:'var(--purple)', border:'#c4b5fd'        },
+  };
+  const rc = roleConfig[role] || roleConfig.guest;
+  badge.style.cssText = `display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid ${rc.border};background:${rc.bg};color:${rc.color};cursor:pointer;font-family:'Sora',sans-serif`;
+  badge.title = 'Click to sign out';
+  badge.textContent = rc.label;
+  badge.onclick = forgetMe;
+  document.querySelector('.hdr-right').prepend(badge);
+
+  // Guest / technician: hide all action panels
+  // We do this via a global CSS class on body
+  document.body.classList.toggle('role-guest',       role==='guest');
+  document.body.classList.toggle('role-technician',  role==='technician');
+  document.body.classList.toggle('role-manager',     role==='manager');
 }
 
 // ================================================================
-// ACTIVITY LOG — tracks every action locally + sends to Sheet
+// PEOPLE TABLE — rendered in Settings tab
 // ================================================================
+function renderPeopleTable(){
+  const tbody = document.getElementById('peopleTableBody');
+  if(!tbody) return;
+  const roleBadge = r => ({
+    manager:    '<span class="sbadge" style="background:var(--purple-l);color:var(--purple)">🏆 Manager</span>',
+    technician: '<span class="sbadge" style="background:var(--teal-l);color:var(--teal)">👷 Technician</span>',
+  }[r] || r);
+  const siteForEmail = email => {
+    const r = ROSTER.find(p=>p.email.toLowerCase()===email.toLowerCase());
+    return r ? siteTag(r.site) : '—';
+  };
+  const isCurrentUser = email => email.toLowerCase() === (CURRENT_USER.email||'').toLowerCase();
+  tbody.innerHTML = Object.entries(ROLES).map(([email, rec])=>`
+    <tr style="${isCurrentUser(email)?'background:var(--accent-l)':''}">
+      <td style="font-weight:${isCurrentUser(email)?'700':'500'}">${rec.name} ${isCurrentUser(email)?'<span style="font-size:10px;color:var(--accent)">(you)</span>':''}</td>
+      <td style="font-size:11px;font-family:\'JetBrains Mono\',monospace;color:var(--muted)">${email}</td>
+      <td>${roleBadge(rec.role)}</td>
+      <td>${siteForEmail(email)}</td>
+      <td style="font-family:\'JetBrains Mono\',monospace;font-size:13px;letter-spacing:3px;color:var(--muted2)">${isManager()?rec.pin:'••••'}</td>
+    </tr>`).join('');
+}
 const ACTIVITY_LOG_KEY = 'taskhub_activity';
 
 function logActivity(action, description, detail){
@@ -2678,8 +2875,11 @@ function renderActivityLog(){
   let log = [];
   try { log = JSON.parse(localStorage.getItem(ACTIVITY_LOG_KEY)||'[]'); } catch(e){}
 
+  const countEl = document.getElementById('activityCount');
+  if(countEl) countEl.textContent = log.length ? `${log.length} entries` : '';
+
   if(!log.length){
-    el.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No activity recorded yet</div>';
+    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">No activity yet — actions will appear here as you use the hub</div>';
     return;
   }
 
@@ -2748,8 +2948,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     updateConnectionUI();
   }
 
-  // Check identity AFTER data loads (slight delay so page is visible first)
-  setTimeout(checkIdentity, 300);
+  // Apply role UI if already logged in, else show gate
+  setTimeout(()=>{
+    if(CURRENT_USER.pinVerified || CURRENT_USER.role==='guest'){
+      applyRoleUI();
+    } else {
+      checkIdentity();
+    }
+  }, 300);
 });
 </script>
 </body>
