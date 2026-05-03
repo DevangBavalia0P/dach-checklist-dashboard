@@ -380,10 +380,11 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
       <select id="identitySelect" onchange="gateStep1Changed()" style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;outline:none;margin-bottom:14px;cursor:pointer">
         <option value="">— Choose your name —</option>
         <optgroup label="Managers" id="managerOptions">
-          <option value="Devang Bavalia|devang.bavalia@knuspr.de|manager">Devang Bavalia (BER Manager)</option>
-          <option value="Aruna Kamara|aruna.kamara@knuspr.de|manager">Aruna Kamara (MUC Manager)</option>
-          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at|manager">Sven GRÜTZNER (VIE Manager)</option>
-          <option value="Younes El Malki|younes.elmalki@knuspr.de|manager">Younes El Malki (FRA Manager)</option>
+          <option value="Raymond Roche|raymond.roche@knuspr.de|manager">Raymond Roche (Regional Facility Lead)</option>
+          <option value="Devang Bavalia|devang.bavalia@knuspr.de|manager">Devang Bavalia (BER Lead)</option>
+          <option value="Aruna Kamara|aruna.kamara@knuspr.de|manager">Aruna Kamara (MUC Lead)</option>
+          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at|manager">Sven GRÜTZNER (VIE Lead)</option>
+          <option value="Younes El Malki|younes.elmalki@knuspr.de|manager">Younes El Malki (FRA Lead)</option>
         </optgroup>
         <optgroup label="BER Technicians" id="techOptions">
           <option value="Ravi Kumar|ravi.kumar@knuspr.de|technician">Ravi Kumar</option>
@@ -2638,7 +2639,8 @@ document.querySelectorAll('.filter-bar .fpill').forEach(btn=>{
 // ================================================================
 const ROLES = {
   // Managers — full access: view + comment + status + assign + tickets
-  'devang.bavalia@knuspr.de':           { pin:'1234', role:'manager', name:'Devang Bavalia'         },
+  'raymond.roche@knuspr.de':           { pin:'2027', role:'manager', name:'Raymond Roche'         },
+  'devang.bavalia@knuspr.de':           { pin:'1911', role:'manager', name:'Devang Bavalia'         },
   'aruna.kamara@knuspr.de':             { pin:'2345', role:'manager', name:'Aruna Kamara'            },
   'sven.grutzner@gurkerl.at':           { pin:'3456', role:'manager', name:'Sven GRÜTZNER'           },
   'younes.elmalki@knuspr.de':           { pin:'4567', role:'manager', name:'Younes El Malki'         },
