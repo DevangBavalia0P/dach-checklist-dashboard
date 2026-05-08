@@ -285,24 +285,29 @@ main{padding:24px 28px;max-width:1600px;margin:0 auto;}
 @media(max-width:700px){main{padding:16px;}.kpi-row{grid-template-columns:1fr 1fr;}.person-grid{grid-template-columns:1fr;}.modal{width:98vw;max-height:95vh;}}
 
 /* ── ROLE-BASED ACCESS CONTROL ── */
-/* Guest: no action panels, no edit buttons, read-only badge on all cards */
+/* Guest + Technician: completely hide manager action panel */
 body.role-guest .action-panel,
-body.role-guest .btn-save,
-body.role-guest .action-select { display:none !important; }
+body.role-technician .action-panel { display:none !important; }
+
+/* Guest: no edit buttons anywhere */
+body.role-guest .btn-save { display:none !important; }
+
+/* Guest + Technician: settings page read-only */
+body.role-guest .settings-input,
+body.role-technician .settings-input {
+  opacity:.5; pointer-events:none; cursor:not-allowed;
+}
+body.role-guest #view-settings .btn-primary,
+body.role-guest #view-settings .btn-ghost,
+body.role-technician #view-settings .btn-primary,
+body.role-technician #view-settings .btn-ghost { display:none !important; }
+
+/* Guest: show read-only badge on submission cards */
 body.role-guest .sub-card::after {
-  content:'👁 View only'; position:absolute; bottom:10px; right:12px;
+  content:'👁 Read only'; position:absolute; bottom:10px; right:12px;
   font-size:10px; color:var(--muted2); font-weight:600; pointer-events:none;
 }
 body.role-guest .sub-card { position:relative; }
-
-/* Technician: can see action panels but only for their own submissions */
-/* Manager action selects (status/assign) hidden for technicians */
-body.role-technician .action-select[id^="sel-status"],
-body.role-technician .action-select[id^="sel-assign"] { opacity:.4; pointer-events:none; cursor:not-allowed; }
-
-/* Guest: hide Settings connection fields */
-body.role-guest #sheetsUrlInput,
-body.role-guest #view-settings .btn-primary { display:none !important; }
 /* ── CONNECT MODAL ── */
 .connect-overlay{position:fixed;inset:0;background:rgba(15,18,40,.55);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
 .connect-overlay.open{display:flex;}
@@ -380,11 +385,11 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
       <select id="identitySelect" onchange="gateStep1Changed()" style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;outline:none;margin-bottom:14px;cursor:pointer">
         <option value="">— Choose your name —</option>
         <optgroup label="Managers" id="managerOptions">
+          <option value="Devang Bavalia|devang.bavalia@knuspr.de|manager">Devang Bavalia (BER Manager)</option>
+          <option value="Aruna Kamara|aruna.kamara@knuspr.de|manager">Aruna Kamara (MUC Manager)</option>
+          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at|manager">Sven GRÜTZNER (VIE Manager)</option>
+          <option value="Younes El Malki|younes.elmalki@knuspr.de|manager">Younes El Malki (FRA Manager)</option>
           <option value="Raymond Roche|raymond.roche@knuspr.de|manager">Raymond Roche (Regional Facility Lead)</option>
-          <option value="Devang Bavalia|devang.bavalia@knuspr.de|manager">Devang Bavalia (BER Lead)</option>
-          <option value="Aruna Kamara|aruna.kamara@knuspr.de|manager">Aruna Kamara (MUC Lead)</option>
-          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at|manager">Sven GRÜTZNER (VIE Lead)</option>
-          <option value="Younes El Malki|younes.elmalki@knuspr.de|manager">Younes El Malki (FRA Lead)</option>
         </optgroup>
         <optgroup label="BER Technicians" id="techOptions">
           <option value="Ravi Kumar|ravi.kumar@knuspr.de|technician">Ravi Kumar</option>
@@ -469,6 +474,14 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
     </div>
   </div>
   <div class="hdr-right">
+    <!-- USER IDENTITY CHIP — always visible top right -->
+    <div id="userChip" style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border2);border-radius:20px;padding:5px 12px 5px 6px;cursor:pointer;transition:all .15s" onclick="userChipClick()" title="Sign in or out">
+      <div id="userAvatar" style="width:26px;height:26px;border-radius:50%;background:var(--muted2);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">?</div>
+      <div style="display:flex;flex-direction:column;line-height:1.3">
+        <span id="userChipName" style="font-size:11px;font-weight:700;color:var(--text)">Not signed in</span>
+        <span id="userChipRole" style="font-size:9px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.5px">👆 Click here to sign in</span>
+      </div>
+    </div>
     <!-- AUTO-REFRESH CHIP -->
     <div class="refresh-chip paused" id="refreshChip" onclick="toggleAutoRefresh()">
       <div class="live-dot" id="refreshDot" style="background:var(--muted)"></div>
@@ -678,6 +691,34 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
 <div class="view" id="view-settings">
   <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
 
+    <!-- SIGN IN / OUT CARD -->
+    <div class="card">
+      <div class="card-hd"><div class="card-title">👤 Account</div></div>
+      <div class="card-body">
+        <div id="settingsAccountSigned" style="display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div id="settingsAccountAvatar" style="width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+            <div>
+              <div id="settingsAccountName" style="font-size:15px;font-weight:700"></div>
+              <div id="settingsAccountEmail" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+              <div id="settingsAccountRole" style="font-size:11px;font-weight:700;margin-top:3px"></div>
+            </div>
+          </div>
+          <button onclick="forgetMe()" style="display:inline-flex;align-items:center;gap:6px;background:#fff1f1;color:var(--red);border:1px solid #fca5a5;padding:8px 16px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.background='#fca5a5'" onmouseout="this.style.background='#fff1f1'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+        </div>
+        <div id="settingsAccountSignedOut" style="display:none;align-items:center;justify-content:space-between;gap:12px">
+          <div style="font-size:13px;color:var(--muted)">You are not signed in — viewing as guest</div>
+          <button onclick="checkIdentity()" style="display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='var(--accent)'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Sign In
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- CONNECTION CARD -->
     <div class="card">
       <div class="card-hd">
@@ -685,6 +726,10 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
         <div id="settingsStatusBadge" class="sbadge s-not">Not connected</div>
       </div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+        <!-- Read-only notice for non-managers -->
+        <div id="settingsReadonlyNotice" style="display:none;background:var(--yellow-l);border:1px solid #fcd34d;border-radius:var(--r-sm);padding:10px 14px;font-size:12px;color:var(--yellow);font-weight:600">
+          🔒 Only managers can change connection settings.
+        </div>
         <div>
           <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Apps Script URL <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted2)">— same URL for reading and writing</span></label>
           <div style="display:flex;gap:8px">
@@ -732,23 +777,6 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
         <div style="margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px">
           <div class="live-dot" id="settingsDot" style="background:var(--muted)"></div>
           <span id="settingsRefreshStatus">Not connected</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- PEOPLE MANAGER -->
-    <div class="card">
-      <div class="card-hd">
-        <div class="card-title">👥 People & Access</div>
-      </div>
-      <div class="card-body" style="padding:0">
-        <div style="overflow-x:auto">
-          <table class="dtable" id="peopleTable">
-            <thead><tr>
-              <th>Name</th><th>Email</th><th>Role</th><th>Site</th><th>PIN</th>
-            </tr></thead>
-            <tbody id="peopleTableBody"></tbody>
-          </table>
         </div>
       </div>
     </div>
@@ -913,8 +941,9 @@ function updateConnectionUI(){
   const bar    = document.getElementById('notConnectedBar');
   const sheetBtn = document.getElementById('openSheetBtn');
 
-  // Sync settings tab fields with current values
-  const urlEl   = document.getElementById('sheetsUrlInput');
+  // Show read-only notice in settings for non-managers
+  const roNotice = document.getElementById('settingsReadonlyNotice');
+  if(roNotice) roNotice.style.display = isManager() ? 'none' : 'block';
   const nameEl  = document.getElementById('userNameInput');
   const emailEl = document.getElementById('userEmailInput');
   if(urlEl)   urlEl.value   = SHEETS_URL || '';
@@ -1429,7 +1458,7 @@ function switchSec(id,btn){
   if(id==='analytics') renderAnalytics();
   else if(id==='people') renderPeople();
   else if(id==='tickets') renderTickets();
-  else if(id==='settings'){ updateConnectionUI(); renderActivityLog(); renderPeopleTable(); }
+  else if(id==='settings'){ updateConnectionUI(); renderActivityLog(); }
   else renderSubmissions();
 }
 
@@ -1601,19 +1630,24 @@ function renderSubmissions(){
                 <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📸 Photos / Videos (${s.imgs.length})</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                   ${s.imgs.map((url,pi)=>{
-                    // Convert Google Drive share link to direct image URL for preview
-                    let previewUrl = url;
                     const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                    if(driveMatch) previewUrl = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w200`;
-                    return `<div style="position:relative">
+                    const previewUrl = driveMatch
+                      ? `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w200`
+                      : url;
+                    return `<div style="display:flex;flex-direction:column;align-items:center;gap:5px">
                       <img src="${previewUrl}" alt="Photo ${pi+1}"
-                        style="width:90px;height:70px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:transform .15s"
+                        style="width:100px;height:76px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:transform .15s"
                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
                         onclick="window.open('${url}','_blank')"
                         onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                       <a href="${url}" target="_blank"
-                        style="display:none;width:90px;height:70px;border-radius:8px;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;flex-direction:column;text-decoration:none;cursor:pointer;gap:4px;font-size:10px;color:var(--muted);font-weight:600">
-                        <span style="font-size:22px">📷</span>Open ${pi+1}
+                        style="display:none;width:100px;height:76px;border-radius:8px;background:var(--bg);border:1px solid var(--border);align-items:center;justify-content:center;flex-direction:column;text-decoration:none;cursor:pointer;gap:3px;font-size:10px;color:var(--muted);font-weight:600">
+                        <span style="font-size:22px">📷</span>Photo ${pi+1}
+                      </a>
+                      <a href="${url}" target="_blank"
+                        style="display:inline-flex;align-items:center;gap:4px;background:var(--accent-l);color:var(--accent);border:1px solid var(--accent);border-radius:5px;padding:3px 8px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap"
+                        onclick="event.stopPropagation()">
+                        🔗 Img ${pi+1}
                       </a>
                     </div>`;
                   }).join('')}
@@ -1632,8 +1666,8 @@ function renderSubmissions(){
             </div>
           </div>
 
-          <!-- MANAGER ACTION PANEL ────────────────────────── -->
-          <div class="action-panel">
+          <!-- MANAGER ACTION PANEL — only shown to managers -->
+          ${isManager()?`<div class="action-panel">
             <div class="action-title">⚡ Manager Actions — saves directly to Google Sheet</div>
             <div class="action-row">
               <div style="display:flex;flex-direction:column;gap:4px">
@@ -1677,7 +1711,7 @@ function renderSubmissions(){
                 <div class="mgr-comment-text">${renderComment(c.text)}</div>
                 ${(c.tagged||[]).length?`<div style="margin-top:4px;font-size:10px;color:var(--accent)">📧 Email sent to: ${c.tagged.map(t=>t.name).join(', ')}</div>`:''}
               </div>`).join('')}</div>`:''}
-          </div>
+          </div>`:''}
         </div>
       </div>
     </div>`;
@@ -2639,11 +2673,11 @@ document.querySelectorAll('.filter-bar .fpill').forEach(btn=>{
 // ================================================================
 const ROLES = {
   // Managers — full access: view + comment + status + assign + tickets
-  'raymond.roche@knuspr.de':           { pin:'2027', role:'manager', name:'Raymond Roche'         },
-  'devang.bavalia@knuspr.de':           { pin:'1911', role:'manager', name:'Devang Bavalia'         },
+  'devang.bavalia@knuspr.de':           { pin:'1234', role:'manager', name:'Devang Bavalia'         },
   'aruna.kamara@knuspr.de':             { pin:'2345', role:'manager', name:'Aruna Kamara'            },
   'sven.grutzner@gurkerl.at':           { pin:'3456', role:'manager', name:'Sven GRÜTZNER'           },
   'younes.elmalki@knuspr.de':           { pin:'4567', role:'manager', name:'Younes El Malki'         },
+  'raymond.roche@knuspr.de':            { pin:'5678', role:'manager', name:'Raymond Roche'            },
 
   // Technicians — can view all + comment on own submissions only
   'ravi.kumar@knuspr.de':               { pin:'1111', role:'technician', name:'Ravi Kumar'           },
@@ -2679,10 +2713,30 @@ let selectedGateRole = ''; // which role card was clicked
 // ================================================================
 // IDENTITY GATE
 // ================================================================
+// Opens login gate — always resets to blank state
 function checkIdentity(){
-  if(CURRENT_USER.role && CURRENT_USER.pinVerified) return;
-  if(CURRENT_USER.role === 'guest') return;
+  // Reset gate UI
+  ['guest','technician','manager'].forEach(r=>{
+    const el = document.getElementById('role'+r.charAt(0).toUpperCase()+r.slice(1));
+    if(el) el.style.borderColor = 'var(--border)';
+  });
+  const guestSec = document.getElementById('gateGuest');
+  const pinSec   = document.getElementById('gatePinForm');
+  if(guestSec) guestSec.style.display = 'none';
+  if(pinSec)   pinSec.style.display   = 'none';
+  if(document.getElementById('pinInput')) document.getElementById('pinInput').value = '';
+  if(document.getElementById('pinError')) document.getElementById('pinError').textContent = '';
   document.getElementById('identityGate').style.display = 'flex';
+}
+
+// User chip click — sign in if not authenticated, sign out if signed in
+function userChipClick(){
+  const signedIn = CURRENT_USER.pinVerified && CURRENT_USER.role && CURRENT_USER.role !== 'guest';
+  if(signedIn){
+    forgetMe();
+  } else {
+    checkIdentity();
+  }
 }
 
 function selectRole(role){
@@ -2775,42 +2829,72 @@ function forgetMe(){
   delete CFG.userName; delete CFG.userEmail; delete CFG.role; delete CFG.pinVerified;
   localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
   CURRENT_USER = { name:'', email:'', role:'', pinVerified:false };
-  document.getElementById('identityGate').style.display = 'flex';
-  // Reset gate
-  ['guest','technician','manager'].forEach(r=>{
-    const el = document.getElementById('role'+r.charAt(0).toUpperCase()+r.slice(1));
-    if(el) el.style.borderColor = 'var(--border)';
-  });
-  document.getElementById('gateGuest').style.display  = 'none';
-  document.getElementById('gatePinForm').style.display = 'none';
+  applyRoleUI();    // reset chip immediately
+  checkIdentity();  // show gate
 }
 
 // ── Apply role-based UI restrictions ─────────────────────────────
 function applyRoleUI(){
   const role = CURRENT_USER.role || 'guest';
+  const name = CURRENT_USER.name || 'Guest';
+  const email = CURRENT_USER.email || '';
 
-  // Header role badge
-  const existing = document.getElementById('roleBadge');
-  if(existing) existing.remove();
-  const badge = document.createElement('div');
-  badge.id = 'roleBadge';
-  const roleConfig = {
-    guest:      { label:'👁 Guest',      bg:'var(--bg)',        color:'var(--muted)',  border:'var(--border2)' },
-    technician: { label:'👷 Technician', bg:'var(--teal-l)',    color:'var(--teal)',   border:'#99f6e4'        },
-    manager:    { label:'🏆 Manager',    bg:'var(--purple-l)',  color:'var(--purple)', border:'#c4b5fd'        },
+  // ── Update header user chip ───────────────────────────────────
+  const chip = document.getElementById('userChip');
+  const avatar = document.getElementById('userAvatar');
+  const chipName = document.getElementById('userChipName');
+  const chipRole = document.getElementById('userChipRole');
+
+  const roleColors = {
+    guest:      { bg:'var(--bg)',       color:'var(--muted)',  border:'var(--border2)', label:'Guest · View only' },
+    technician: { bg:'var(--teal-l)',   color:'var(--teal)',   border:'#99f6e4',        label:'Technician' },
+    manager:    { bg:'var(--purple-l)', color:'var(--purple)', border:'#c4b5fd',        label:'Manager · Full access' },
   };
-  const rc = roleConfig[role] || roleConfig.guest;
-  badge.style.cssText = `display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid ${rc.border};background:${rc.bg};color:${rc.color};cursor:pointer;font-family:'Sora',sans-serif`;
-  badge.title = 'Click to sign out';
-  badge.textContent = rc.label;
-  badge.onclick = forgetMe;
-  document.querySelector('.hdr-right').prepend(badge);
+  const rc = roleColors[role] || roleColors.guest;
 
-  // Guest / technician: hide all action panels
-  // We do this via a global CSS class on body
-  document.body.classList.toggle('role-guest',       role==='guest');
-  document.body.classList.toggle('role-technician',  role==='technician');
-  document.body.classList.toggle('role-manager',     role==='manager');
+  const signedIn = CURRENT_USER.pinVerified && role !== 'guest';
+
+  if(chip){
+    chip.style.background  = signedIn ? rc.bg  : 'var(--accent-l)';
+    chip.style.borderColor = signedIn ? rc.border : 'var(--accent)';
+    chip.title = signedIn ? 'Click to sign out' : 'Click to sign in';
+  }
+  if(avatar){
+    avatar.style.background = signedIn ? rc.color : 'var(--accent)';
+    avatar.textContent = signedIn
+      ? name.split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase()
+      : '?';
+  }
+  if(chipName) chipName.textContent = signedIn ? name : 'Not signed in';
+  if(chipRole){
+    chipRole.textContent = signedIn ? rc.label : '👆 Click here to sign in';
+    chipRole.style.color  = signedIn ? rc.color : 'var(--accent)';
+  }
+
+  // ── Update Settings account card ──────────────────────────────
+  const signedInEl  = document.getElementById('settingsAccountSigned');
+  const signedOutEl = document.getElementById('settingsAccountSignedOut');
+  const accAvatar   = document.getElementById('settingsAccountAvatar');
+  const accName     = document.getElementById('settingsAccountName');
+  const accEmail    = document.getElementById('settingsAccountEmail');
+  const accRole     = document.getElementById('settingsAccountRole');
+
+  if(!signedIn){
+    if(signedInEl)  signedInEl.style.display  = 'none';
+    if(signedOutEl) signedOutEl.style.display  = 'flex';
+  } else {
+    if(signedInEl)  signedInEl.style.display  = 'flex';
+    if(signedOutEl) signedOutEl.style.display  = 'none';
+    if(accAvatar){ accAvatar.style.background = rc.color; accAvatar.textContent = avatar ? avatar.textContent : ''; }
+    if(accName)  accName.textContent  = name;
+    if(accEmail) accEmail.textContent = email;
+    if(accRole){ accRole.textContent = rc.label; accRole.style.color = rc.color; }
+  }
+
+  // ── Body class for CSS role rules ────────────────────────────
+  document.body.classList.toggle('role-guest',      role==='guest');
+  document.body.classList.toggle('role-technician', role==='technician');
+  document.body.classList.toggle('role-manager',    role==='manager');
 }
 
 // ================================================================
