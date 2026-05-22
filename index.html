@@ -341,100 +341,37 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
 </div>
 
 <!-- IDENTITY GATE — shown if no name set -->
-<div id="identityGate" style="display:none;position:fixed;inset:0;background:rgba(15,18,40,.75);z-index:3000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
-  <div style="background:var(--white);border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,.3);width:min(460px,92vw);padding:32px;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)">
-
-    <div style="text-align:center;margin-bottom:24px">
-      <div style="font-size:36px;margin-bottom:10px">🔐</div>
-      <div style="font-size:20px;font-weight:700;margin-bottom:6px">DACH Task Hub</div>
-      <div style="font-size:13px;color:var(--muted)">Choose how you want to access the hub</div>
+<div id="identityGate" style="display:none;position:fixed;inset:0;background:rgba(15,18,40,.88);z-index:3000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:var(--white);border-radius:20px;box-shadow:0 32px 80px rgba(0,0,0,.35);width:min(400px,92vw);padding:36px;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:56px;height:56px;border-radius:16px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px">🔐</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:8px;color:var(--text)">DACH Task Hub</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Manager access only.<br>Unauthorised access is not permitted.</div>
     </div>
-
-    <!-- ROLE PICKER -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:24px">
-      <div onclick="selectRole('guest')" id="roleGuest" style="border:2px solid var(--border);border-radius:var(--r-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s">
-        <div style="font-size:22px;margin-bottom:6px">👁</div>
-        <div style="font-size:12px;font-weight:700">Guest</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">View only</div>
-      </div>
-      <div onclick="selectRole('technician')" id="roleTechnician" style="border:2px solid var(--border);border-radius:var(--r-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s">
-        <div style="font-size:22px;margin-bottom:6px">👷</div>
-        <div style="font-size:12px;font-weight:700">Technician</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">PIN required</div>
-      </div>
-      <div onclick="selectRole('manager')" id="roleManager" style="border:2px solid var(--border);border-radius:var(--r-sm);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s">
-        <div style="font-size:22px;margin-bottom:6px">🏆</div>
-        <div style="font-size:12px;font-weight:700">Manager</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">Full access</div>
-      </div>
-    </div>
-
-    <!-- GUEST: just enter -->
-    <div id="gateGuest" style="display:none">
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:16px;font-size:12px;color:var(--muted);line-height:1.7">
-        👁 <strong style="color:var(--text)">Guest mode</strong> — you can view all submissions, charts and tickets in read-only mode. You cannot add comments, change status or assign tasks.
-      </div>
-      <button onclick="enterAsGuest()" style="width:100%;background:var(--bg);color:var(--text);border:1.5px solid var(--border2);padding:11px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'">
-        Enter as Guest →
-      </button>
-    </div>
-
-    <!-- TECHNICIAN / MANAGER: name + PIN -->
-    <div id="gatePinForm" style="display:none">
-      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name</label>
-      <select id="identitySelect" onchange="gateStep1Changed()" style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;outline:none;margin-bottom:14px;cursor:pointer">
-        <option value="">— Choose your name —</option>
-        <optgroup label="Managers" id="managerOptions">
-          <option value="Devang Bavalia|devang.bavalia@knuspr.de|manager">Devang Bavalia (BER Manager)</option>
-          <option value="Aruna Kamara|aruna.kamara@knuspr.de|manager">Aruna Kamara (MUC Manager)</option>
-          <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at|manager">Sven GRÜTZNER (VIE Manager)</option>
-          <option value="Younes El Malki|younes.elmalki@knuspr.de|manager">Younes El Malki (FRA Manager)</option>
-          <option value="Raymond Roche|raymond.roche@knuspr.de|manager">Raymond Roche (Regional Facility Lead)</option>
-          <option value="Stefan Regelin|stefan.regelin@knuspr.de|manager">Stefan Regelin (Regional Facility Specialist)</option>
-        </optgroup>
-        <optgroup label="BER Technicians" id="techOptions">
-          <option value="Ravi Kumar|ravi.kumar@knuspr.de|technician">Ravi Kumar</option>
-          <option value="Florin Adrian Bordianu|florin.bordianu@knuspr.de|technician">Florin Adrian Bordianu</option>
-          <option value="Glan Miranda|glan.miranda@knuspr.de|technician">Glan Miranda</option>
-          <option value="Sikandar Khan|sikandar.khan@knuspr.de|technician">Sikandar Khan</option>
-        </optgroup>
-        <optgroup label="MUC Technicians">
-          <option value="Tarun Gauniyal|tarun.gauniyal@knuspr.de|technician">Tarun Gauniyal</option>
-          <option value="Keval Kakadiya|keval.kakadiya@knuspr.de|technician">Keval Kakadiya</option>
-          <option value="Roshil Rose|roshil.rose@knuspr.de|technician">Roshil Rose</option>
-          <option value="Enosh Varghese|enosh.varghese@knuspr.de|technician">Enosh Varghese</option>
-          <option value="Jordan McGregor|jordan.mcgregor@knuspr.de|technician">Jordan McGregor</option>
-          <option value="Yogendra Rathore|yogendra.rathore@knuspr.de|technician">Yogendra Rathore</option>
-        </optgroup>
-        <optgroup label="VIE Technicians">
-          <option value="Omar SABER|omar.saber@gurkerl.at|technician">Omar SABER</option>
-          <option value="Ali JAFARI|ali.reza@gurkerl.at|technician">Ali JAFARI</option>
-          <option value="Seyedvahab MIRMOSTAFAVI|seyedvahab.mirmostafavi@gurkerl.at|technician">Seyedvahab MIRMOSTAFAVI</option>
-          <option value="Mustafa ZAINAL|mustafa.zainal@gurkerl.at|technician">Mustafa ZAINAL</option>
-          <option value="Danijel KARAPANDZA|danijel.karapandza@gurkerl.at|technician">Danijel KARAPANDZA</option>
-        </optgroup>
-        <optgroup label="FRA Technicians">
-          <option value="Edison|edison.caushaj@knuspr.de|technician">Edison</option>
-          <option value="Amine Kabdani|amine.kabdani@knuspr.de|technician">Amine Kabdani</option>
-        </optgroup>
-      </select>
-
-      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">PIN</label>
-      <input id="pinInput" type="password" inputmode="numeric" maxlength="6"
-        placeholder="• • • •" onkeydown="if(event.key==='Enter')confirmIdentity()"
-        style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:10px;outline:none;margin-bottom:6px;text-align:center;transition:border-color .15s">
-      <div id="pinError" style="color:var(--red);font-size:12px;font-weight:600;min-height:18px;margin-bottom:12px;text-align:center"></div>
-
-      <button onclick="confirmIdentity()" style="width:100%;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='var(--accent)'">
-        Sign In →
-      </button>
-    </div>
-
-    <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted)">
-      Remembered on this device after first login · <a href="#" onclick="forgetMe();return false" style="color:var(--accent)">Sign out</a>
+    <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">Your Name</label>
+    <select id="identitySelect" onchange="gateStep1Changed()" style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:14px;font-weight:500;outline:none;margin-bottom:16px;cursor:pointer">
+      <option value="">— Select your name —</option>
+      <option value="Devang Bavalia|devang.bavalia@knuspr.de|manager">Devang Bavalia</option>
+      <option value="Aruna Kamara|aruna.kamara@knuspr.de|manager">Aruna Kamara</option>
+      <option value="Sven GRÜTZNER|sven.grutzner@gurkerl.at|manager">Sven GRÜTZNER</option>
+      <option value="Younes El Malki|younes.elmalki@knuspr.de|manager">Younes El Malki</option>
+      <option value="Raymond Roche|raymond.roche@knuspr.de|manager">Raymond Roche</option>
+      <option value="Stefan Regelin|stefan.regelin@knuspr.de|manager">Stefan Regelin</option>
+    </select>
+    <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px">PIN</label>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="6"
+      placeholder="• • • •" onkeydown="if(event.key==='Enter')confirmIdentity()"
+      style="width:100%;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);padding:12px 14px;border-radius:var(--r-sm);font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:12px;outline:none;margin-bottom:6px;text-align:center;transition:border-color .15s">
+    <div id="pinError" style="color:var(--red);font-size:12px;font-weight:600;min-height:18px;margin-bottom:14px;text-align:center"></div>
+    <button onclick="confirmIdentity()" style="width:100%;background:var(--accent);color:#fff;border:none;padding:13px;border-radius:var(--r-sm);font-family:'Sora',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='var(--accent)'">
+      Sign In →
+    </button>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--muted)">
+      Session saved on this device · <a href="#" onclick="forgetMe();return false" style="color:var(--accent)">Sign out</a>
     </div>
   </div>
 </div>
+
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
@@ -854,9 +791,9 @@ code{font-family:'JetBrains Mono',monospace;font-size:11px;}
 let CFG = JSON.parse(localStorage.getItem('taskhub_cfg') || '{}');
 
 // Derive live values (fallback to hardcoded if set in code)
-let SHEETS_URL = CFG.sheetsUrl || "https://script.google.com/macros/s/AKfycbxbrYqC0x7eT9D6RRbmHBqY9MiE65ChrINVvY9CKho2TOwitnoeYWH430QymxHD4nHaBw/exec";
-let WRITE_URL  = CFG.sheetsUrl || "https://script.google.com/macros/s/AKfycbxbrYqC0x7eT9D6RRbmHBqY9MiE65ChrINVvY9CKho2TOwitnoeYWH430QymxHD4nHaBw/exec"; // same URL for GET+POST
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/1qVpjQ9RWDYXHa7QBGw8YR2Iv_edwS4QthKJfCYto-Ac";
+let SHEETS_URL = CFG.sheetsUrl || "";
+let WRITE_URL  = CFG.sheetsUrl || ""; // same URL for GET+POST
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxbrYqC0x7eT9D6RRbmHBqY9MiE65ChrINVvY9CKho2TOwitnoeYWH430QymxHD4nHaBw/exec";
 
 let CURRENT_USER = {
   name:        CFG.userName    || '',
@@ -1028,7 +965,7 @@ function changeInterval(e){
 }
 
 function toggleAutoRefresh(){
-  // clicking the chip pauses/resumes
+  if(!isManager()){ checkIdentity(); return; }
   if(!isConnected){ openConnect(); return; }
   if(autoRefreshTimer || countdownTimer){
     clearInterval(autoRefreshTimer); clearInterval(countdownTimer);
@@ -1042,9 +979,10 @@ function toggleAutoRefresh(){
 }
 
 async function manualRefresh(){
+  if(!isManager()){ checkIdentity(); return; }
   const icon = document.getElementById('refreshIcon');
   icon.style.animation='spin .8s linear infinite';
-  DATA_CACHE = null; // force fresh fetch
+  DATA_CACHE = null;
   countdown = refreshIntervalSec;
   await refreshData(true);
   icon.style.animation='';
@@ -1064,6 +1002,7 @@ const ROSTER = [
   {name:"Amine Kabdani",email:"amine.kabdani@knuspr.de",site:"FRA",lead:"Younes El Malki"},
   {name:"Shubham Rajaram Ghogare",email:"shubham.ghogare@knuspr.de",site:"FRA",lead:"Younes El Malki"},
   {name:"Tarun Gauniyal",email:"tarun.gauniyal@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
+  {name:"Raj Vaghani",email:"vaghani.raj@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
   {name:"Keval Kakadiya",email:"keval.kakadiya@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
   {name:"Roshil Rose",email:"roshil.rose@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
   {name:"Enosh Varghese",email:"enosh.varghese@knuspr.de",site:"MUC",lead:"Aruna Kamara"},
@@ -1201,6 +1140,8 @@ let DATA_CACHE_AT = 0;
 const CACHE_TTL_MS = 45 * 1000; // 45 seconds client-side cache
 
 async function refreshData(forceRefresh = false){
+  // ── MANAGER ONLY — block all data access ─────────────────────
+  if(!isManager()){ return; }
   if(!SHEETS_URL){ loadSampleData(); renderAll(); return; }
 
   // Return cached data if fresh and not forced
@@ -2672,31 +2613,33 @@ document.querySelectorAll('.filter-bar .fpill').forEach(btn=>{
 // ================================================================
 const ROLES = {
   // Managers — full access: view + comment + status + assign + tickets
-  'devang.bavalia@knuspr.de':           { pin:'1911', role:'manager', name:'Devang Bavalia'         },
+  'devang.bavalia@knuspr.de':           { pin:'1234', role:'manager', name:'Devang Bavalia'         },
   'aruna.kamara@knuspr.de':             { pin:'2345', role:'manager', name:'Aruna Kamara'            },
-  'sven.grutzner@gurkerl.at':           { pin:'4827', role:'manager', name:'Sven GRÜTZNER'           },
-  'younes.elmalki@knuspr.de':           { pin:'9134', role:'manager', name:'Younes El Malki'         },
+  'sven.grutzner@gurkerl.at':           { pin:'3456', role:'manager', name:'Sven GRÜTZNER'           },
+  'younes.elmalki@knuspr.de':           { pin:'4567', role:'manager', name:'Younes El Malki'         },
   'raymond.roche@knuspr.de':            { pin:'5678', role:'manager', name:'Raymond Roche'            },
-  'stefan.regelin@knuspr.de':            { pin:'5785', role:'manager', name:'Stefan Regelin'            },
 
   // Technicians — can view all + comment on own submissions only
-  'ravi.kumar@knuspr.de':               { pin:'2758', role:'technician', name:'Ravi Kumar'           },
-  'florin.bordianu@knuspr.de':          { pin:'6401', role:'technician', name:'Florin Adrian Bordianu'},
-  'glan.miranda@knuspr.de':             { pin:'1189', role:'technician', name:'Glan Miranda'          },
-  'sikandar.khan@knuspr.de':            { pin:'7532', role:'technician', name:'Sikandar Khan'         },
-  'tarun.gauniyal@knuspr.de':           { pin:'4067', role:'technician', name:'Tarun Gauniyal'        },
-  'keval.kakadiya@knuspr.de':           { pin:'8921', role:'technician', name:'Keval Kakadiya'        },
+  'ravi.kumar@knuspr.de':               { pin:'1111', role:'technician', name:'Ravi Kumar'           },
+  'florin.bordianu@knuspr.de':          { pin:'2222', role:'technician', name:'Florin Adrian Bordianu'},
+  'glan.miranda@knuspr.de':             { pin:'3333', role:'technician', name:'Glan Miranda'          },
+  'sikandar.khan@knuspr.de':            { pin:'4444', role:'technician', name:'Sikandar Khan'         },
+  'tarun.gauniyal@knuspr.de':           { pin:'5555', role:'technician', name:'Tarun Gauniyal'        },
+  'vaghani.raj@knuspr.de':              { pin:'1470', role:'technician', name:'Raj Vaghani'            },
+  'keval.kakadiya@knuspr.de':           { pin:'6666', role:'technician', name:'Keval Kakadiya'        },
   'roshil.rose@knuspr.de':              { pin:'7777', role:'technician', name:'Roshil Rose'           },
-  'enosh.varghese@knuspr.de':           { pin:'5316', role:'technician', name:'Enosh Varghese'        },
-  'jordan.mcgregor@knuspr.de':          { pin:'2470', role:'technician', name:'Jordan McGregor'       },
+  'enosh.varghese@knuspr.de':           { pin:'8888', role:'technician', name:'Enosh Varghese'        },
+  'jordan.mcgregor@knuspr.de':          { pin:'9999', role:'technician', name:'Jordan McGregor'       },
   'yogendra.rathore@knuspr.de':         { pin:'1212', role:'technician', name:'Yogendra Rathore'      },
-  'omar.saber@gurkerl.at':              { pin:'6843', role:'technician', name:'Omar SABER'            },
-  'ali.reza@gurkerl.at':                { pin:'1597', role:'technician', name:'Ali JAFARI'            },
-  'seyedvahab.mirmostafavi@gurkerl.at': { pin:'7204', role:'technician', name:'Seyedvahab MIRMOSTAFAVI'},
-  'mustafa.zainal@gurkerl.at':          { pin:'3381', role:'technician', name:'Mustafa ZAINAL'        },
-  'danijel.karapandza@gurkerl.at':      { pin:'9652', role:'technician', name:'Danijel KARAPANDZA'    },
-  'edison.caushaj@knuspr.de':           { pin:'8710', role:'technician', name:'Edison'                },
-  'amine.kabdani@knuspr.de':            { pin:'2965', role:'technician', name:'Amine Kabdani'         },
+  'omar.saber@gurkerl.at':              { pin:'2323', role:'technician', name:'Omar SABER'            },
+  'ali.reza@gurkerl.at':                { pin:'3434', role:'technician', name:'Ali JAFARI'            },
+  'seyedvahab.mirmostafavi@gurkerl.at': { pin:'4545', role:'technician', name:'Seyedvahab MIRMOSTAFAVI'},
+  'mustafa.zainal@gurkerl.at':          { pin:'5656', role:'technician', name:'Mustafa ZAINAL'        },
+  'danijel.karapandza@gurkerl.at':      { pin:'6767', role:'technician', name:'Danijel KARAPANDZA'    },
+  'jacek.rek@knuspr.de':                { pin:'7878', role:'technician', name:'Jacek Rek'             },
+  'edison.caushaj@knuspr.de':           { pin:'8989', role:'technician', name:'Edison'                },
+  'amine.kabdani@knuspr.de':            { pin:'9090', role:'technician', name:'Amine Kabdani'         },
+  'shubham.ghogare@knuspr.de':          { pin:'1357', role:'technician', name:'Shubham Rajaram Ghogare'},
 };
 
 // ── Role capability checks ────────────────────────────────────────
@@ -2706,25 +2649,18 @@ function isGuest()       { return CURRENT_USER.role === 'guest'; }
 
 const MAX_PIN_ATTEMPTS = 5;
 let pinAttempts = 0;
-let selectedGateRole = ''; // which role card was clicked
+// selectedGateRole removed — managers only
 
 // ================================================================
 // IDENTITY GATE
 // ================================================================
-// Opens login gate — always resets to blank state
+// Opens login gate — manager only
 function checkIdentity(){
-  // Reset gate UI
-  ['guest','technician','manager'].forEach(r=>{
-    const el = document.getElementById('role'+r.charAt(0).toUpperCase()+r.slice(1));
-    if(el) el.style.borderColor = 'var(--border)';
-  });
-  const guestSec = document.getElementById('gateGuest');
-  const pinSec   = document.getElementById('gatePinForm');
-  if(guestSec) guestSec.style.display = 'none';
-  if(pinSec)   pinSec.style.display   = 'none';
   if(document.getElementById('pinInput')) document.getElementById('pinInput').value = '';
   if(document.getElementById('pinError')) document.getElementById('pinError').textContent = '';
+  if(document.getElementById('identitySelect')) document.getElementById('identitySelect').value = '';
   document.getElementById('identityGate').style.display = 'flex';
+  setTimeout(()=>{ const s=document.getElementById('identitySelect'); if(s) s.focus(); }, 100);
 }
 
 // User chip click — sign in if not authenticated, sign out if signed in
@@ -2737,33 +2673,8 @@ function userChipClick(){
   }
 }
 
-function selectRole(role){
-  selectedGateRole = role;
-  // Highlight selected card
-  ['guest','technician','manager'].forEach(r=>{
-    const el = document.getElementById('role'+r.charAt(0).toUpperCase()+r.slice(1));
-    if(el) el.style.borderColor = r===role ? 'var(--accent)' : 'var(--border)';
-  });
-  // Show relevant section
-  document.getElementById('gateGuest').style.display   = role==='guest'      ? 'block' : 'none';
-  document.getElementById('gatePinForm').style.display  = role!=='guest'      ? 'block' : 'none';
-
-  // Filter dropdown to match selected role
-  const sel = document.getElementById('identitySelect');
-  if(sel){
-    Array.from(sel.options).forEach(opt=>{
-      if(!opt.value) return; // keep placeholder
-      const parts = opt.value.split('|');
-      const optRole = parts[2]||'technician';
-      opt.hidden = (role === 'manager' && optRole !== 'manager') ||
-                   (role === 'technician' && optRole !== 'technician');
-    });
-    sel.value = '';
-    document.getElementById('pinInput').value = '';
-    document.getElementById('pinError').textContent = '';
-    setTimeout(()=>sel.focus(), 50);
-  }
-}
+// selectRole removed — managers only now
+function selectRole(role){ /* no-op */ }
 
 function gateStep1Changed(){
   document.getElementById('pinError').textContent = '';
@@ -2771,14 +2682,8 @@ function gateStep1Changed(){
   setTimeout(()=>document.getElementById('pinInput').focus(), 50);
 }
 
-function enterAsGuest(){
-  CURRENT_USER = { name:'Guest', email:'', role:'guest', pinVerified:true };
-  CFG.role = 'guest'; CFG.pinVerified = true; CFG.userName = 'Guest'; CFG.userEmail = '';
-  localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
-  document.getElementById('identityGate').style.display = 'none';
-  applyRoleUI();
-  logActivity('login', 'Guest viewed dashboard', '');
-}
+// enterAsGuest removed — managers only
+function enterAsGuest(){ checkIdentity(); }
 
 function confirmIdentity(){
   const sel = document.getElementById('identitySelect');
@@ -2787,13 +2692,17 @@ function confirmIdentity(){
 
   if(!sel.value){ sel.style.borderColor='var(--red)'; err.textContent='Please select your name.'; return; }
 
-  const parts       = sel.value.split('|');
-  const name        = parts[0], email = parts[1];
-  const enteredPin  = pin.value.trim();
-  const record      = ROLES[email.toLowerCase()];
+  const parts      = sel.value.split('|');
+  const name       = parts[0], email = parts[1], roleHint = parts[2];
+  const enteredPin = pin.value.trim();
+  const record     = ROLES[email.toLowerCase()];
 
-  if(!record){ err.textContent='⚠ No PIN configured. Contact your manager.'; return; }
-  if(record.role !== selectedGateRole){ err.textContent='⚠ Wrong login type selected for this account.'; return; }
+  // ── MANAGER ONLY ────────────────────────────────────────────
+  if(!record || record.role !== 'manager'){
+    err.textContent = '⛔ Access denied. This dashboard is for managers only.';
+    pin.value = ''; sel.value = '';
+    return;
+  }
 
   if(enteredPin !== record.pin){
     pinAttempts++;
@@ -2801,9 +2710,9 @@ function confirmIdentity(){
     pin.style.borderColor = 'var(--red)';
     setTimeout(()=>pin.style.borderColor='', 1500);
     if(pinAttempts >= MAX_PIN_ATTEMPTS){
-      err.textContent = '🔒 Too many failed attempts. Reload the page to try again.';
+      err.textContent = '🔒 Too many failed attempts. Reload the page.';
       pin.disabled = true; sel.disabled = true;
-      document.querySelector('#gatePinForm button').disabled = true;
+      document.querySelectorAll('#identityGate button').forEach(b=>b.disabled=true);
       return;
     }
     const left = MAX_PIN_ATTEMPTS - pinAttempts;
@@ -2811,15 +2720,17 @@ function confirmIdentity(){
     pin.focus(); return;
   }
 
-  // ✅ Correct PIN
+  // ✅ Correct PIN — manager confirmed
   pinAttempts = 0;
-  CURRENT_USER = { name, email, role: record.role, pinVerified: true };
-  CFG = { ...CFG, userName: name, userEmail: email, role: record.role, pinVerified: true };
+  CURRENT_USER = { name, email, role:'manager', pinVerified:true };
+  CFG = { ...CFG, userName:name, userEmail:email, role:'manager', pinVerified:true };
   localStorage.setItem('taskhub_cfg', JSON.stringify(CFG));
   document.getElementById('identityGate').style.display = 'none';
   applyRoleUI();
   updateConnectionUI();
-  logActivity('login', `Signed in as ${record.role}`, `${name} · ${email}`);
+  // Now load live data for the first time
+  if(SHEETS_URL) refreshData(true); else { loadSampleData(); renderAll(); }
+  logActivity('login', `Manager signed in`, `${name} · ${email}`);
 }
 
 function forgetMe(){
@@ -3022,24 +2933,20 @@ document.addEventListener('DOMContentLoaded',()=>{
   const sel = document.getElementById('refreshInterval');
   if(sel) sel.value = String(refreshIntervalSec);
 
-  // Load data — live if connected, sample if not
-  if(isConnected){
-    updateConnectionUI();
-    refreshData();
-  } else {
-    loadSampleData();
-    renderAll();
-    updateConnectionUI();
-  }
-
-  // Apply role UI if already logged in, else show gate
+  // Data loads ONLY after manager sign-in (handled in gate callback)
+  // ── MANAGER GATE — always required ──────────────────────────
   setTimeout(()=>{
-    if(CURRENT_USER.pinVerified || CURRENT_USER.role==='guest'){
+    if(CURRENT_USER.role === 'manager' && CURRENT_USER.pinVerified){
+      // Already signed in as manager — load data
       applyRoleUI();
+      if(isConnected) refreshData(); else { loadSampleData(); renderAll(); updateConnectionUI(); }
     } else {
+      // Not authenticated — clear any stale state and show gate
+      CURRENT_USER = { name:'', email:'', role:'', pinVerified:false };
+      document.body.className = ''; // remove any role classes
       checkIdentity();
     }
-  }, 300);
+  }, 200);
 });
 </script>
 </body>
